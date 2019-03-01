@@ -2,7 +2,7 @@
 -I src
 
 theories/Jisuanji.v
-theories/Qoc_Jisuanji.v
+theories/qoc_jisuanji.v
 
 src/jisuanji_main.ml
 src/g_jisuanji.mlg
