@@ -1,0 +1,9 @@
+-R theories/ Qoc
+-I src
+
+theories/Jisuanji.v
+theories/Qoc_Jisuanji.v
+
+src/jisuanji_main.ml
+src/g_jisuanji.mlg
+src/jisuanji_plugin.mlpack
