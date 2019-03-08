@@ -486,7 +486,24 @@ let tag_var = tag Tag.variable
 
     match CAst.(a.v) with
 
-    | CProdN (bl,a) ->
+      | CIf (c,(na,po),b1,b2) ->
+      (* On force les parenthèses autour d'un "if" sous-terme (même si le
+         parsing est lui plus tolérant) *)
+       let (strm, prec) = 
+        return (
+          hv 0 (
+              hov 1 (keyword "若" (* "若" "ruo" ; OLD: "if" *) ++ spc () ++ pr mt ltop c
+                   ++ pr_simple_return_type (pr mt) na po) ++
+              spc () ++
+                hov 0 (keyword "则" (* "则" "ze" ; OLD:"then" *)
+                     ++ pr (fun () -> brk (1,1)) ltop b1) ++ spc () ++
+              hov 0 (keyword "否则" (* "否则" "fouze" ; OLD: "else" *)  ++ pr (fun () -> brk (1,1)) ltop b2)),
+        lif
+        ) in
+       pr_with_comments ?loc
+         (sep() ++ if prec_less prec inherited then strm else surround strm) 
+
+      | CProdN (bl,a) ->
        let (strm, prec) = 
          return (
              hov 0 (
