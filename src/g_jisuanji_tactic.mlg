@@ -539,7 +539,11 @@ GRAMMAR EXTEND Gram
       (* Basic tactics *)
         IDENT "intros"; pl = ne_intropatterns ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (false,pl)) }
+      | IDENT "介绍" (* "介绍" "jieshao" ; OLD:"intros" *) ; pl = ne_intropatterns ->
+          { TacAtom (CAst.make ~loc @@ TacIntroPattern (false,pl)) }
       | IDENT "intros" ->
+          { TacAtom (CAst.make ~loc @@ TacIntroPattern (false,[CAst.make ~loc @@IntroForthcoming false])) }
+      | IDENT "介绍" (* "介绍" "jieshao" ; OLD:"intros" *) ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (false,[CAst.make ~loc @@IntroForthcoming false])) }
       | IDENT "eintros"; pl = ne_intropatterns ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (true,pl)) }
@@ -558,6 +562,8 @@ GRAMMAR EXTEND Gram
           inhyp = in_hyp_as -> { TacAtom (CAst.make ~loc @@ TacApply (false,true,cl,inhyp)) }
       | IDENT "elim"; cl = constr_with_bindings_arg; el = OPT eliminator ->
           { TacAtom (CAst.make ~loc @@ TacElim (false,cl,el)) }
+      | IDENT "消除" (* "消除" "xiaochu" ; OLD" "elim" *) ; cl = constr_with_bindings_arg; el = OPT eliminator ->
+          { TacAtom (CAst.make ~loc @@ TacElim (false,cl,el)) }	  
       | IDENT "eelim"; cl = constr_with_bindings_arg; el = OPT eliminator ->
           { TacAtom (CAst.make ~loc @@ TacElim (true,cl,el)) }
       | IDENT "例子" (* "例子" "lizi" ; "事例" "shili" ; OLD: "case" *);
@@ -657,6 +663,8 @@ GRAMMAR EXTEND Gram
       (* Equality and inversion *)
       | IDENT "rewrite"; l = LIST1 oriented_rewriter SEP ",";
 	  cl = clause_dft_concl; t=by_tactic -> { TacAtom (CAst.make ~loc @@ TacRewrite (false,l,cl,t)) }
+      | IDENT "改写" (* "改写" "gaixie" ; OLD: "rewrite" *) ; l = LIST1 oriented_rewriter SEP ",";
+	  cl = clause_dft_concl; t=by_tactic -> { TacAtom (CAst.make ~loc @@ TacRewrite (false,l,cl,t)) }	 
       | IDENT "erewrite"; l = LIST1 oriented_rewriter SEP ",";
 	  cl = clause_dft_concl; t=by_tactic -> { TacAtom (CAst.make ~loc @@ TacRewrite (true,l,cl,t)) }
       | IDENT "dependent"; k =

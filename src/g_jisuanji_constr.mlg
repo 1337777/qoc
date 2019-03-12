@@ -33,9 +33,9 @@ open Pcoq.Constr
 let ldots_var = Id.of_string ".."
 
 let constr_kw =
-  [ "若" ; "则" ; "否则" ; "返回" ; "如" ;  "对于所有" ; "forall"; "fun"; "match"; "fix"; "cofix"; "with"; "in"; "for";
-    "end"; "as"; "let"; "if"; "then"; "else"; "return";
-    "Prop"; "Set"; "Type"; ".("; "_"; "..";
+  [  "对全部" ; "forall"; "fun"; "match"; "匹配" ; "fix"; "cofix"; "with"; "与" ; "in"; "for";
+    "end"; "结束" ; "as"; "如" ; "let"; "if"; "若" ; "then"; "则" ; "else"; "否则" ; "return"; "返回" ;
+    "Prop"; "Set";  "Type"; "类型" ; ".("; "_"; "..";
     "`{"; "`("; "{|"; "|}" ]
 
 let _ = List.iter CLexer.add_keyword constr_kw
@@ -160,13 +160,16 @@ GRAMMAR EXTEND Gram
     [ [ "Set"  -> { GSet }
       | "Prop" -> { GProp }
       | "Type" -> { GType [] }
+      | "类型" (* "类型" "leixing" ; OLD: "Type" *) -> { GType [] }
       | "Type"; "@{"; u = universe; "}" -> { GType u }
+      | "类型" (* "类型" "leixing" ; OLD: "Type" *) ; "@{"; u = universe; "}" -> { GType u }
       ] ]
   ;
   sort_family:
     [ [ "Set"  -> { Sorts.InSet }
       | "Prop" -> { Sorts.InProp }
       | "Type" -> { Sorts.InType }
+      | "类型" (* "类型" "leixing" ; OLD: "Type" *) -> { Sorts.InType }
       ] ]
   ;
   universe_expr:
@@ -243,6 +246,65 @@ GRAMMAR EXTEND Gram
       ] ]
   ;
 *)
+  operconstr:
+    [ "200" RIGHTA
+      [ c = binder_constr -> { c } ]
+    | "100" RIGHTA
+      [ c1 = operconstr; "<:"; c2 = binder_constr ->
+                 { CAst.make ~loc @@ CCast(c1, CastVM c2) }
+      | c1 = operconstr; "<:"; c2 = SELF ->
+                 { CAst.make ~loc @@ CCast(c1, CastVM c2) }
+      | c1 = operconstr; "<<:"; c2 = binder_constr ->
+                 { CAst.make ~loc @@ CCast(c1, CastNative c2) }
+      | c1 = operconstr; "<<:"; c2 = SELF ->
+                 { CAst.make ~loc @@ CCast(c1, CastNative c2) }
+      | c1 = operconstr; ":";c2 = binder_constr ->
+                 { CAst.make ~loc @@ CCast(c1, CastConv c2) }
+      | c1 = operconstr; ":"; c2 = SELF ->
+                 { CAst.make ~loc @@ CCast(c1, CastConv c2) }
+      | c1 = operconstr; ":>" ->
+                 { CAst.make ~loc @@ CCast(c1, CastCoerce) } ]
+    | "99" RIGHTA [ ]
+    | "90" RIGHTA [ ]
+    | "10" LEFTA 
+      [ f=operconstr; args=LIST1 appl_arg -> { CAst.make ~loc @@ CApp((None,f),args) }
+      |  "@"; f=global; i = instance; args=LIST0 NEXT -> { CAst.make ~loc @@ CAppExpl((None,f,i),args) }
+      | "@"; lid = pattern_identref; args=LIST1 identref ->
+        { let { CAst.loc = locid; v = id } = lid in
+          let args = List.map (fun x -> CAst.make @@ CRef (qualid_of_ident ?loc:x.CAst.loc x.CAst.v, None), None) args in
+          CAst.make ~loc @@ CApp((None, CAst.make ?loc:locid @@ CPatVar id),args) } ]
+
+(**MEMO: THIS BRANCH CAUSE ERROR
+    | "9"
+      [ ".."; c = operconstr LEVEL "0"; ".." ->
+        { CAst.make ~loc @@ CAppExpl ((None, (qualid_of_ident ~loc ldots_var), None),[c]) } ]
+*)
+
+    | "8" [ ]
+    | "1" LEFTA
+      [ c=operconstr; ".("; f=global; args=LIST0 appl_arg; ")" ->
+	{ CAst.make ~loc @@ CApp((Some (List.length args+1), CAst.make @@ CRef (f,None)),args@[c,None]) }
+      | c=operconstr; ".("; "@"; f=global;
+        args=LIST0 (operconstr LEVEL "9"); ")" ->
+        { CAst.make ~loc @@ CAppExpl((Some (List.length args+1),f,None),args@[c]) }
+      | c=operconstr; "%"; key=IDENT -> { CAst.make ~loc @@ CDelimiters (key,c) } ]
+    | "0"
+      [ c=atomic_constr -> { c }
+      | c=match_constr -> { c }
+      | "("; c = operconstr LEVEL "200"; ")" ->
+        { (match c.CAst.v with
+            | CPrim (Numeral (n,true)) ->
+                CAst.make ~loc @@ CNotation((InConstrEntrySomeLevel,"( _ )"),([c],[],[],[]))
+            | _ -> c) }
+      | "{|"; c = record_declaration; "|}" -> { c }
+      | "{"; c = binder_constr ; "}" ->
+          { CAst.make ~loc @@ CNotation((InConstrEntrySomeLevel,"{ _ }"),([c],[],[],[])) }
+      | "`{"; c = operconstr LEVEL "200"; "}" ->
+	  { CAst.make ~loc @@ CGeneralization (Implicit, None, c) }
+      | "`("; c = operconstr LEVEL "200"; ")" ->
+	  { CAst.make ~loc @@ CGeneralization (Explicit, None, c) }
+      ] ]
+  ;
   record_declaration:
     [ [ fs = record_fields -> { CAst.make ~loc @@ CRecord fs } ] ]
   ;
@@ -259,7 +321,7 @@ GRAMMAR EXTEND Gram
       { (id, mkLambdaCN ~loc bl c) } ] ]
   ;
   binder_constr:
-    [ [ "对于所有" (* "对于所有" "duiyu suoyou" OLD: "forall" *) ; bl = open_binders; ","; c = operconstr LEVEL "200" ->
+    [ [ "对全部" (* "对全部" "duiyu suoyou" OLD: "forall" *) ; bl = open_binders; ","; c = operconstr LEVEL "200" ->
           { mkProdCN ~loc bl c }
       | "fun"; bl = open_binders; "=>"; c = operconstr LEVEL "200" ->
           { mkLambdaCN ~loc bl c }
@@ -332,6 +394,7 @@ GRAMMAR EXTEND Gram
     [ [ "Set" -> { GSet }
       | "Prop" -> { GProp }
       | "Type" -> { GType UUnknown }
+      | "类型" (* "类型" "leixing" ; OLD: "Type" *) -> { GType UUnknown }
       | "_" -> { GType UAnonymous }
       | id = global -> { GType (UNamed id) }
       ] ]
@@ -358,12 +421,18 @@ GRAMMAR EXTEND Gram
   ;
   match_constr:
     [ [ "match"; ci=LIST1 case_item SEP ","; ty=OPT case_type; "with";
-        br=branches; "end" -> { CAst.make ~loc @@ CCases(RegularStyle,ty,ci,br) } ] ]
+        br=branches; "end" -> { CAst.make ~loc @@ CCases(RegularStyle,ty,ci,br) }
+       | "匹配" (* "匹配" "pipei" ; OLD: "match" *) ; ci=LIST1 case_item SEP ","; ty=OPT case_type; "与";
+        br=branches; "结束" (* "结束" "jieshu" ; OLD: "end" *) -> { CAst.make ~loc @@ CCases(RegularStyle,ty,ci,br) } ] ]
   ;
   case_item:
     [ [ c=operconstr LEVEL "100";
         ona = OPT ["as"; id=name -> { id } ];
 	ty = OPT ["in"; t=pattern -> { t } ] ->
+	   { (c,ona,ty) }
+	| c=operconstr LEVEL "100";
+        ona = OPT [ "如" (* "如" ; OLD: "as" *) ; id=name -> { id } ];
+	ty = OPT [ "在" (* "在" "zai" ; OLD: "in" *) ; t=pattern -> { t } ] ->
 	   { (c,ona,ty) } ] ]
   ;
   case_type:

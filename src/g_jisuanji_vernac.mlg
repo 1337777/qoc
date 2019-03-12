@@ -216,6 +216,8 @@ GRAMMAR EXTEND Gram
           VernacInductive (cum, priv,f,indl) }
       | "Fixpoint"; recs = LIST1 rec_definition SEP "with" ->
           { VernacFixpoint (NoDischarge, recs) }
+      | "固定点" (* "固定点" "guodingdian" ; OLD: "Fixpoint" *) ; recs = LIST1 rec_definition SEP "with" ->
+          { VernacFixpoint (NoDischarge, recs) }
       | IDENT "Let"; "Fixpoint"; recs = LIST1 rec_definition SEP "with" ->
           { VernacFixpoint (DoDischarge, recs) }
       | "CoFixpoint"; corecs = LIST1 corec_definition SEP "with" ->
@@ -329,7 +331,8 @@ GRAMMAR EXTEND Gram
   ] ]
   ;
   finite_token:
-    [ [ IDENT "归纳义" (* "归纳义" "guinayi" ; "归纳以" "guinayi" ; OLD: "Inductive" *) -> { (Inductive_kw,Finite) }
+    [ [ IDENT "Inductive" -> { (Inductive_kw,Finite) }
+      | IDENT "归纳义" (* "归纳义" "guinayi" ; "归纳以" "guinayi" ; OLD: "Inductive" *) -> { (Inductive_kw,Finite) }
       | IDENT "CoInductive" -> { (CoInductive,CoFinite) }
       | IDENT "Variant" -> { (Variant,BiFinite) }
       | IDENT "Record" -> { (Record,BiFinite) }
