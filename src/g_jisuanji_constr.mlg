@@ -422,7 +422,7 @@ GRAMMAR EXTEND Gram
   match_constr:
     [ [ "match"; ci=LIST1 case_item SEP ","; ty=OPT case_type; "with";
         br=branches; "end" -> { CAst.make ~loc @@ CCases(RegularStyle,ty,ci,br) }
-       | "匹配" (* "匹配" "pipei" ; OLD: "match" *) ; ci=LIST1 case_item SEP ","; ty=OPT case_type; "与";
+       | "匹配" (* "匹配" "pipei" ; OLD: "match" *) ; ci=LIST1 case_item SEP ","; ty=OPT case_type; "与" (* "与" "yu" ; OLD: "with" *);
         br=branches; "结束" (* "结束" "jieshu" ; OLD: "end" *) -> { CAst.make ~loc @@ CCases(RegularStyle,ty,ci,br) } ] ]
   ;
   case_item:

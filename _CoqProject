@@ -4,7 +4,9 @@
 theories/Jisuanji.v
 qoc_jisuanji.v
 
-src/jisuanji_main.ml
+src/jisuanji_ppconstr.ml
+src/jisuanji_printmod.ml
+src/jisuanji_prettyp.ml
 src/g_jisuanji.mlg
 src/g_jisuanji_constr.mlg
 src/g_jisuanji_coretactics.mlg

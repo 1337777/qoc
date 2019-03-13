@@ -558,6 +558,10 @@ GRAMMAR EXTEND Gram
 	bl = LIST0 module_binder; sign = of_module_type;
 	body = is_module_expr ->
 	  { VernacDefineModule (export, id, bl, sign, body) }
+      | IDENT "包裹" (* "包裹" "baoguo" ; OLD: "Module" *) ; export = export_token; id = identref;
+	bl = LIST0 module_binder; sign = of_module_type;
+	body = is_module_expr ->
+	  { VernacDefineModule (export, id, bl, sign, body) }
       | IDENT "Module"; "Type"; id = identref;
 	bl = LIST0 module_binder; sign = check_module_types;
 	body = is_module_type ->
@@ -945,7 +949,9 @@ GRAMMAR EXTEND Gram
 
       (* Printing (careful factorization of entries) *)
       | IDENT "Print"; p = printable -> { VernacPrint p }
+      | IDENT "打印" (* "打印" "dayin" ; OLD: "Print" *) ; p = printable -> { VernacPrint p }
       | IDENT "Print"; qid = smart_global; l = OPT univ_name_list -> { VernacPrint (PrintName (qid,l)) }
+      | IDENT "打印" (* "打印" "dayin" ; OLD: "Print" *); qid = smart_global; l = OPT univ_name_list -> { VernacPrint (PrintName (qid,l)) }
       | IDENT "Print"; IDENT "Module"; "Type"; qid = global ->
 	  { VernacPrint (PrintModuleType qid) }
       | IDENT "Print"; IDENT "Module"; qid = global ->
@@ -993,6 +999,8 @@ GRAMMAR EXTEND Gram
       | IDENT "Compute"; c = lconstr; "." ->
 	  { fun g -> VernacCheckMayEval (Some (Genredexpr.CbvVm None), g, c) }
       | IDENT "Check"; c = lconstr; "." ->
+	 { fun g -> VernacCheckMayEval (None, g, c) }
+      | IDENT "校验" ; c = lconstr; "." ->
 	 { fun g -> VernacCheckMayEval (None, g, c) }
       (* Searching the environment *)
       | IDENT "About"; qid = smart_global; l = OPT univ_name_list; "." ->

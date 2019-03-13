@@ -1,7 +1,8 @@
 open Ppconstr      
 
 (** ---------------------- INCLUDE COPY ppconstr.ml ------------------------- **)
-   
+
+(*i*)
 open CErrors
 open Util
 open Pp
@@ -16,6 +17,7 @@ open Constrexpr_ops
 open Notation_gram
 open Decl_kinds
 open Namegen
+(*i*)
 
 module Tag =
 struct
@@ -163,13 +165,13 @@ let tag_var = tag Tag.variable
   let pr_glob_sort = let open Glob_term in function
     | GProp -> tag_type (str "Prop")
     | GSet -> tag_type (str "Set")
-    | GType [] -> tag_type (str "类型" (* "类型" "leixing" ; OLD: "Type" *))
-    | GType u -> hov 0 (tag_type (str "类型" (* "类型" "leixing" ; OLD: "Type" *)) ++ pr_univ_annot pr_univ u)
+    | GType [] -> tag_type (str "Type")
+    | GType u -> hov 0 (tag_type (str "Type") ++ pr_univ_annot pr_univ u)
 
   let pr_glob_level = let open Glob_term in function
     | GProp -> tag_type (str "Prop")
     | GSet -> tag_type (str "Set")
-    | GType UUnknown -> tag_type (str "类型" (* "类型" "leixing" ; OLD: "Type" *))
+    | GType UUnknown -> tag_type (str "Type")
     | GType UAnonymous -> tag_type (str "_")
     | GType (UNamed u) -> tag_type (pr_qualid u)
 
@@ -196,7 +198,7 @@ let tag_var = tag Tag.variable
     | GType u ->
       (match u with
         | UNamed u -> pr_qualid u
-        | UAnonymous -> tag_type (str "类型" (* "类型" "leixing" ; OLD: "Type" *))
+        | UAnonymous -> tag_type (str "Type")
         | UUnknown -> tag_type (str "_"))
 
   let pr_universe_instance l =
@@ -463,7 +465,7 @@ let tag_var = tag Tag.variable
     prlist_with_sep pr_semicolon
       (fun (id, c) -> h 1 (pr_reference id ++ spc () ++ str":=" ++ pr ltop c)) l
 
-  let pr_forall n = keyword "forall" ++ pr_com_at n ++ spc ()
+  let pr_forall n = keyword "对全部" (* "对全部" "duiyu suoyou" OLD: "forall" *) ++ pr_com_at n ++ spc ()
 
   let pr_fun n = keyword "fun" ++ pr_com_at n ++ spc ()
 
@@ -476,20 +478,138 @@ let tag_var = tag Tag.variable
       | _ ->
         pr sep inherited a
 
-(** ---------------------- START MODIFICATION ------------------------- **)
-
-  let pr_forall n = keyword "对于所有" ++ pr_com_at n ++ spc ()
-
-  let my_modular_constr_pr pr sep inherited a =
+  let pr pr sep inherited a =
     let return (cmds, prec) = (tag_constr_expr a cmds, prec) in
-    let loc = constr_loc a in
-
-    match CAst.(a.v) with
-
+    let (strm, prec) = match CAst.(a.v) with
+      | CRef (r, us) ->
+        return (pr_cref r us, latom)
+      | CFix (id,fix) ->
+        return (
+          hov 0 (keyword "fix" ++ spc () ++
+                   pr_recursive
+                   (pr_fixdecl (pr mt) (pr_dangling_with_for mt pr)) id.v fix),
+          lfix
+        )
+      | CCoFix (id,cofix) ->
+        return (
+          hov 0 (keyword "cofix" ++ spc () ++
+                   pr_recursive
+                   (pr_cofixdecl (pr mt) (pr_dangling_with_for mt pr)) id.v cofix),
+          lfix
+        )
+      | CProdN (bl,a) ->
+        return (
+          hov 0 (
+            hov 2 (pr_delimited_binders pr_forall spc
+                     (pr mt ltop) bl) ++
+              str "," ++ pr spc ltop a),
+          lprod
+        )
+      | CLambdaN (bl,a) ->
+        return (
+          hov 0 (
+            hov 2 (pr_delimited_binders pr_fun spc
+                     (pr mt ltop) bl) ++
+              pr_fun_sep ++ pr spc ltop a),
+          llambda
+        )
+      | CLetIn ({v=Name x}, ({ v = CFix({v=x'},[_])}
+                          |  { v = CCoFix({v=x'},[_]) } as fx), t, b)
+          when Id.equal x x' ->
+        return (
+          hv 0 (
+            hov 2 (keyword "let" ++ spc () ++ pr mt ltop fx
+                   ++ spc ()
+                   ++ keyword "in") ++
+              pr spc ltop b),
+          lletin
+        )
+      | CLetIn (x,a,t,b) ->
+        return (
+          hv 0 (
+            hov 2 (keyword "let" ++ spc () ++ pr_lname x
+                   ++ pr_opt_no_spc (fun t -> str " :" ++ ws 1 ++ pr mt ltop t) t
+                   ++ str " :=" ++ pr spc ltop a ++ spc ()
+                   ++ keyword "in") ++
+              pr spc ltop b),
+          lletin
+        )
+      | CAppExpl ((Some i,f,us),l) ->
+        let l1,l2 = List.chop i l in
+        let c,l1 = List.sep_last l1 in
+        let p = pr_proj (pr mt) pr_appexpl c (f,us) l1 in
+        if not (List.is_empty l2) then
+          return (p ++ prlist (pr spc (lapp,L)) l2, lapp)
+        else
+          return (p, lproj)
+      | CAppExpl ((None,qid,us),[t])
+      | CApp ((_, {v = CRef(qid,us)}),[t,None])
+          when qualid_is_ident qid && Id.equal (qualid_basename qid) Notation_ops.ldots_var ->
+        return (
+          hov 0 (str ".." ++ pr spc (latom,E) t ++ spc () ++ str ".."),
+          larg
+        )
+      | CAppExpl ((None,f,us),l) ->
+        return (pr_appexpl (pr mt) (f,us) l, lapp)
+      | CApp ((Some i,f),l) ->
+        let l1,l2 = List.chop i l in
+        let c,l1 = List.sep_last l1 in
+        assert (Option.is_empty (snd c));
+        let p = pr_proj (pr mt) pr_app (fst c) f l1 in
+        if not (List.is_empty l2) then
+          return (
+            p ++ prlist (fun a -> spc () ++ pr_expl_args (pr mt) a) l2,
+            lapp
+          )
+        else
+          return (p, lproj)
+      | CApp ((None,a),l) ->
+        return (pr_app (pr mt) a l, lapp)
+      | CRecord l ->
+        return (
+          hv 0 (str"{|" ++ pr_record_body_gen (pr spc) l ++ str" |}"),
+          latom
+        )
+      | CCases (Constr.LetPatternStyle,rtntypopt,[c,as_clause,in_clause],[{v=([[p]],b)}]) ->
+        return (
+          hv 0 (
+            keyword "let" ++ spc () ++ str"'" ++
+              hov 0 (pr_patt ltop p ++
+                       pr_asin (pr_dangling_with_for mt pr) as_clause in_clause ++
+                       str " :=" ++ pr spc ltop c ++
+                       pr_case_type (pr_dangling_with_for mt pr) rtntypopt ++
+                       spc () ++ keyword "in" ++ pr spc ltop b)),
+          lletpattern
+        )
+      | CCases(_,rtntypopt,c,eqns) ->
+        return (
+          v 0
+            (hv 0 (keyword "匹配" (* "匹配" "pipei" ; OLD: "match" *) ++ brk (1,2) ++
+                     hov 0 (
+                       prlist_with_sep sep_v
+                         (pr_case_item (pr_dangling_with_for mt pr)) c
+                       ++ pr_case_type (pr_dangling_with_for mt pr) rtntypopt) ++
+                     spc () ++ keyword "与" (* "与" "yu" ; OLD: "with" *)) ++
+               prlist (pr_eqn (pr mt)) eqns ++ spc()
+             ++ keyword "结束" (* "结束" "jieshu" ; OLD: "end" *)),
+          latom
+        )
+      | CLetTuple (nal,(na,po),c,b) ->
+        return (
+          hv 0 (
+            hov 2 (keyword "let" ++ spc () ++
+              hov 1 (str "(" ++
+                       prlist_with_sep sep_v pr_lname nal ++
+                       str ")" ++
+                       pr_simple_return_type (pr mt) na po ++ str " :=") ++
+                       pr spc ltop c
+                     ++ keyword " in") ++
+              pr spc ltop b),
+          lletin
+        )
       | CIf (c,(na,po),b1,b2) ->
       (* On force les parenthèses autour d'un "if" sous-terme (même si le
          parsing est lui plus tolérant) *)
-       let (strm, prec) = 
         return (
           hv 0 (
               hov 1 (keyword "若" (* "若" "ruo" ; OLD: "if" *) ++ spc () ++ pr mt ltop c
@@ -499,34 +619,90 @@ let tag_var = tag Tag.variable
                      ++ pr (fun () -> brk (1,1)) ltop b1) ++ spc () ++
               hov 0 (keyword "否则" (* "否则" "fouze" ; OLD: "else" *)  ++ pr (fun () -> brk (1,1)) ltop b2)),
         lif
-        ) in
-       pr_with_comments ?loc
-         (sep() ++ if prec_less prec inherited then strm else surround strm) 
+        )
 
-      | CProdN (bl,a) ->
-       let (strm, prec) = 
-         return (
-             hov 0 (
-                 hov 2 (pr_delimited_binders pr_forall spc
-                          (pr mt ltop) bl) ++
-                   str "," ++ pr spc ltop a),
-             lprod
-           ) in
-       pr_with_comments ?loc
-         (sep() ++ if prec_less prec inherited then strm else surround strm) 
-       
-    | _ -> modular_constr_pr pr sep inherited a
+      | CHole (_,IntroIdentifier id,_) ->
+        return (str "?[" ++ pr_id id ++ str "]", latom)
+      | CHole (_,IntroFresh id,_) ->
+        return (str "?[?" ++ pr_id id ++ str "]", latom)
+      | CHole (_,_,_) ->
+        return (str "_", latom)
+      | CEvar (n,l) ->
+        return (pr_evar (pr mt) n l, latom)
+      | CPatVar p ->
+        return (str "@?" ++ pr_patvar p, latom)
+      | CSort s ->
+        return (pr_glob_sort s, latom)
+      | CCast (a,b) ->
+        return (
+          hv 0 (pr mt (lcast,L) a ++ spc () ++
+                  match b with
+                    | CastConv b -> str ":" ++ ws 1 ++ pr mt (-lcast,E) b
+                    | CastVM b -> str "<:" ++ ws 1 ++ pr mt (-lcast,E) b
+                    | CastNative b -> str "<<:" ++ ws 1 ++ pr mt (-lcast,E) b
+                    | CastCoerce -> str ":>"),
+          lcast
+        )
+      | CNotation ((_,"( _ )"),([t],[],[],[])) ->
+        return (pr (fun()->str"(") (max_int,L) t ++ str")", latom)
+      | CNotation (s,env) ->
+        pr_notation (pr mt) pr_patt (pr_binders_gen (pr mt ltop)) s env
+      | CGeneralization (bk,ak,c) ->
+        return (pr_generalization bk ak (pr mt ltop c), latom)
+      | CPrim p ->
+        return (pr_prim_token p, prec_of_prim_token p)
+      | CDelimiters (sc,a) ->
+        return (pr_delimiters sc (pr mt (ldelim,E) a), ldelim)
+    in
+    let loc = constr_loc a in
+    pr_with_comments ?loc
+      (sep() ++ if prec_less prec inherited then strm else surround strm)
 
-         
+(**
+  type term_pr = {
+    pr_constr_expr   : constr_expr -> Pp.t;
+    pr_lconstr_expr  : constr_expr -> Pp.t;
+    pr_constr_pattern_expr  : constr_pattern_expr -> Pp.t;
+    pr_lconstr_pattern_expr : constr_pattern_expr -> Pp.t
+  }
+**)
+
+  let modular_constr_pr = pr
   let rec fix rf x = rf (fix rf) x
-  let my_pr = fix my_modular_constr_pr mt
+  let pr = fix modular_constr_pr mt
 
-  let my_default_term_pr = {
-      pr_constr_expr   = my_pr lsimpleconstr;
-      pr_lconstr_expr  = my_pr ltop;
-      pr_constr_pattern_expr  = my_pr lsimpleconstr;
-      pr_lconstr_pattern_expr = my_pr ltop
-    }
+  let pr prec = function
+    (* A toplevel printer hack mimicking parsing, incidentally meaning
+       that we cannot use [pr] correctly anymore in a recursive loop
+       if the current expr is followed by other exprs which would be
+       interpreted as arguments *)
+    | { CAst.v = CAppExpl ((None,f,us),[]) } -> str "@" ++ pr_cref f us
+    | c -> pr prec c
 
-  let _ = set_term_pr my_default_term_pr
-            
+  let transf env sigma c =
+    if !Flags.beautify_file then
+      let r = Constrintern.for_grammar (Constrintern.intern_constr env sigma) c in
+      Constrextern.extern_glob_constr (Termops.vars_of_env env) r
+    else c
+
+  let pr_expr prec c =
+    let env = Global.env () in
+    let sigma = Evd.from_env env in
+    pr prec (transf env sigma c)
+
+  let pr_simpleconstr = pr_expr lsimpleconstr
+
+  let default_term_pr = {
+    pr_constr_expr   = pr_simpleconstr;
+    pr_lconstr_expr  = pr_expr ltop;
+    pr_constr_pattern_expr  = pr_simpleconstr;
+    pr_lconstr_pattern_expr = pr_expr ltop
+  }
+
+(**  let term_pr = ref default_term_pr
+  let set_term_pr = (:=) term_pr
+... **)
+
+(** ---------------------- START MODIFICATION ------------------------- **)
+
+  let _ = set_term_pr default_term_pr

@@ -1,5 +1,7 @@
 From Qoc Require Import Jisuanji .
 
+Module infiniteNumbers .
+  
 Inductive infiniteNumbers : Type :=
   Zero : infiniteNumbers
 | NextOne : infiniteNumbers -> infiniteNumbers .
@@ -14,6 +16,8 @@ Section Section1 .
     end .
 
 End Section1 .
+
+Print addMore .
 
 Lemma lemma1 : forall ( pOutsideInside : infiniteNumbers ) ,
     addMore (NextOne Zero) pOutsideInside = addMore pOutsideInside (NextOne Zero) .
@@ -32,8 +36,12 @@ Proof .
     reflexivity .
 Qed .
 
-Reset infiniteNumbers .
+End infiniteNumbers .
 
+Print infiniteNumbers .
+
+包裹 无限数字包裹 .
+  
 归纳义 无限数字 : 类型 :=
   零 : 无限数字
 | 下一个 : 无限数字 -> 无限数字 .
@@ -48,6 +56,8 @@ Reset infiniteNumbers .
     结束 .
 
 结束 部分1 .
+
+打印 加更多 .
 
 论点 论点1 : 对全部 ( p外内 : 无限数字 ) ,
     加更多 (下一个 零) p外内 = 加更多 p外内 (下一个 零) .
@@ -66,10 +76,13 @@ Reset infiniteNumbers .
     同一 .
 据证实 .
 
-Reset 无限数字 .
+结束 无限数字包裹 .
 
+打印 无限数字包裹 .
 
 (**
+Bāoguǒ wúxiàn shùzì bāoguǒ.
+  
 Guīnà yì wúxiàn shùzì: Lèixíng:=
   Líng: Wúxiàn shùzì
 | xià yīgè: Wúxiàn shùzì -> wúxiàn shùzì.
@@ -85,22 +98,28 @@ Bùfèn bùfèn 1.
 
 Jiéshù bùfèn 1.
 
+Dǎyìn jiā gèng duō.
+
 Lùndiǎn lùndiǎn 1: Duì quánbù (p wài nèi: Wúxiàn shùzì),
     jiā gèng duō (xià yīgè líng) p wài nèi = jiā gèng duō p wài nèi (xià yīgè líng).
 Zhèngmíng.
   Jièshào p wài nèi.
   Jiǎnhuà.
   Xiāochú p wài nèi.
-  - (* P wài nèi shì (líng)*)
+  - (** P wài nèi shì (líng)*)
     jiǎnhuà.
     Tóngyī.
-  - (* P wài nèi shì (xià yīgè q wài nèi)*)
+  - (** P wài nèi shì (xià yīgè q wài nèi)*)
     jièshào q wài nèi.
     Jièshào lùndiǎn 1_q wài nèi.
     Jiǎnhuà.
     Gǎixiě lùndiǎn 1_q wài nèi.
     Tóngyī.
 Jù zhèngshí.
+
+Jiéshù wúxiàn shùzì bāoguǒ.
+
+Dǎyìn wúxiàn shùzì bāoguǒ.
 *)
 
 
