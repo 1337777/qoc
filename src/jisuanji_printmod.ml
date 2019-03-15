@@ -110,7 +110,7 @@ let print_mutual_inductive env mind mib udecl =
   let keyword =
     let open Declarations in
     match mib.mind_finite with
-    | Finite -> "归纳义" (* "归纳义" "guinayi" ; "归纳以" "guinayi" ; OLD: "Inductive" *)
+    | Finite -> "归纳的" (* "归纳义" "guinayi" ; "归纳以" "guinayi" ; OLD: "Inductive" *)
     | BiFinite -> "Variant"
     | CoFinite -> "CoInductive"
   in

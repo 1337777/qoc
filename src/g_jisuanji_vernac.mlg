@@ -332,7 +332,7 @@ GRAMMAR EXTEND Gram
   ;
   finite_token:
     [ [ IDENT "Inductive" -> { (Inductive_kw,Finite) }
-      | IDENT "归纳义" (* "归纳义" "guinayi" ; "归纳以" "guinayi" ; OLD: "Inductive" *) -> { (Inductive_kw,Finite) }
+      | IDENT "归纳的" (* "归纳的" "guinade" ; "归纳以" "guinayi" ; OLD: "Inductive" *) -> { (Inductive_kw,Finite) }
       | IDENT "CoInductive" -> { (CoInductive,CoFinite) }
       | IDENT "Variant" -> { (Variant,BiFinite) }
       | IDENT "Record" -> { (Record,BiFinite) }
