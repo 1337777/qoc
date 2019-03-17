@@ -23,58 +23,63 @@ Inductive decideParam_S : forall (q : nat) (l : listParam (S q)), decideParam (S
 | Some_decideParam_S : forall (q : nat) (l : listParam (S q)), forall (f : formula q l),
       decideParam_S q l (Some q l f : decideParam (S q) l) .
 
+(** this is the easy inversion lemma for [deciseParam_S] *)
 Lemma formula_of_decideParam_S : forall (q : nat) (l : listParam (S q)) (fo : decideParam (S q) l), decideParam_S q l fo -> formula q l .
 Proof.
-  destruct 1.  exact f.
+  destruct 1. exact f.
 Defined.
 
-Definition computeOptionParam : forall (p : nat) (l : listParam p), decideParam p l -> Type .
+Definition computeDecideParam : forall (p : nat) (l : listParam p), decideParam p l -> Type .
 Proof.
   intros p. case p.
   - intros l fo. refine (decideParam_0 l (None l)).
   - intros p' l fo. refine (decideParam_S p' l fo).
 Defined.
 
-Definition computeOptionParam_of_decideParam : forall (p : nat) (l : listParam p) (fo : decideParam p l), computeOptionParam p l fo .
+Definition computeDecideParam_of_decideParam : forall (p : nat) (l : listParam p) (fo : decideParam p l), computeDecideParam p l fo .
 Proof.
   intros p l fo . case fo.
   - intros l'. exact (None_decideParam_0 l').
   - intros q  l' f. apply (Some_decideParam_S q l' f).
 Defined.
 
+(** this is the difficult inversion lemma for [deciseParam (S _)] *)
 Definition decideParam_S_of_decideParam__S : forall (q : nat) (l : listParam (S q)) (fo : decideParam (S q) l), decideParam_S q l fo.
 Proof.
-  intros q l. exact (computeOptionParam_of_decideParam (S q) l).
+  intros q l. exact (computeDecideParam_of_decideParam (S q) l).
 Defined.
 
 End section_formula .
 
-Section section_tail_of_listParam .
+Section section_rest_of_listParam .
 
 Let formula : forall (q : nat) (l : listParam (S q)), Type
     := (fun (q : nat) (l : listParam (S q)) => listParam q) .
 
-Definition tail_of_listParam : forall (p : nat) (l : listParam p), decideParam formula p l .
+Definition rest_of_listParam : forall (p : nat) (l : listParam p), decideParam formula p l .
 Proof.
   intros p l. elim l.
   - simpl. exact (None formula (Nil)).
-  - simpl. intros d q l' IH_l'. apply (Some formula).
+  - simpl. intros d q l' IH_l'. clear IH_l'. apply (Some formula).
     unfold formula. exact l'.
 Defined.
 
-Definition tail_of_listParam_S : forall (q : nat) (l : listParam (S q)), listParam q .
+Definition rest_of_listParam_S : forall (q : nat) (l : listParam (S q)), listParam q .
 Proof.
-  intros q l. apply (formula_of_decideParam_S formula q l (tail_of_listParam (S q) l)).
+  intros q l. apply (formula_of_decideParam_S formula q l (rest_of_listParam (S q) l)).
   apply (decideParam_S_of_decideParam__S formula q l) .
 Defined.
 
-End section_tail_of_listParam .
+End section_rest_of_listParam .
 End section_data .
 
 Eval compute in (Cons nat 22 2 (Cons nat 11 1 (Cons nat 00 0 (Nil nat)))).
-Eval compute in (tail_of_listParam_S nat 2 (Cons nat 22 2 (Cons nat 11 1 (Cons nat 00 0 (Nil nat))))).
+Eval compute in (rest_of_listParam_S nat 2 (Cons nat 22 2 (Cons nat 11 1 (Cons nat 00 0 (Nil nat))))).
 
 End InductiveParametrizedForm .
+
+(** ------------------------- *)
+
 
 From Qoc Require Import Jisuanji .
     
