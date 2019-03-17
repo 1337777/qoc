@@ -1,5 +1,83 @@
-From Qoc Require Import Jisuanji .
+Module InductiveParametrizedForm .
 
+Section section_data .
+
+Variable data : Type .
+
+Inductive listParam : nat -> Type := 
+  Nil : listParam 0 
+| Cons : forall (d : data), forall (q : nat) (l : listParam q), listParam (S q).
+
+Section section_formula.
+
+Variable formula : forall (q : nat) (l : listParam (S q)), Type .
+
+Inductive decideParam : forall (p : nat) (l : listParam p), Type :=
+  None : forall (l : listParam 0), decideParam 0 l
+| Some : forall (q : nat) (l : listParam (S q)), forall (f : formula q l), decideParam (S q) l .
+
+Inductive decideParam_0 :  forall (l : listParam 0), decideParam 0 l -> Type :=
+| None_decideParam_0 : forall (l : listParam 0), decideParam_0 l (None l : decideParam 0 l) .
+
+Inductive decideParam_S : forall (q : nat) (l : listParam (S q)), decideParam (S q) l -> Type :=
+| Some_decideParam_S : forall (q : nat) (l : listParam (S q)), forall (f : formula q l),
+      decideParam_S q l (Some q l f : decideParam (S q) l) .
+
+Lemma formula_of_decideParam_S : forall (q : nat) (l : listParam (S q)) (fo : decideParam (S q) l), decideParam_S q l fo -> formula q l .
+Proof.
+  destruct 1.  exact f.
+Defined.
+
+Definition computeOptionParam : forall (p : nat) (l : listParam p), decideParam p l -> Type .
+Proof.
+  intros p. case p.
+  - intros l fo. refine (decideParam_0 l (None l)).
+  - intros p' l fo. refine (decideParam_S p' l fo).
+Defined.
+
+Definition computeOptionParam_of_decideParam : forall (p : nat) (l : listParam p) (fo : decideParam p l), computeOptionParam p l fo .
+Proof.
+  intros p l fo . case fo.
+  - intros l'. exact (None_decideParam_0 l').
+  - intros q  l' f. apply (Some_decideParam_S q l' f).
+Defined.
+
+Definition decideParam_S_of_decideParam__S : forall (q : nat) (l : listParam (S q)) (fo : decideParam (S q) l), decideParam_S q l fo.
+Proof.
+  intros q l. exact (computeOptionParam_of_decideParam (S q) l).
+Defined.
+
+End section_formula .
+
+Section section_tail_of_listParam .
+
+Let formula : forall (q : nat) (l : listParam (S q)), Type
+    := (fun (q : nat) (l : listParam (S q)) => listParam q) .
+
+Definition tail_of_listParam : forall (p : nat) (l : listParam p), decideParam formula p l .
+Proof.
+  intros p l. elim l.
+  - simpl. exact (None formula (Nil)).
+  - simpl. intros d q l' IH_l'. apply (Some formula).
+    unfold formula. exact l'.
+Defined.
+
+Definition tail_of_listParam_S : forall (q : nat) (l : listParam (S q)), listParam q .
+Proof.
+  intros q l. apply (formula_of_decideParam_S formula q l (tail_of_listParam (S q) l)).
+  apply (decideParam_S_of_decideParam__S formula q l) .
+Defined.
+
+End section_tail_of_listParam .
+End section_data .
+
+Eval compute in (Cons nat 22 2 (Cons nat 11 1 (Cons nat 00 0 (Nil nat)))).
+Eval compute in (tail_of_listParam_S nat 2 (Cons nat 22 2 (Cons nat 11 1 (Cons nat 00 0 (Nil nat))))).
+
+End InductiveParametrizedForm .
+
+From Qoc Require Import Jisuanji .
+    
 Module infiniteNumbers .
   
 Inductive infiniteNumbers : Type :=
