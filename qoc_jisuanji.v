@@ -49,7 +49,60 @@ Inductive infiniteNumbers : Type :=
   Zero : infiniteNumbers
 | NextOne : infiniteNumbers -> infiniteNumbers .
 
-Section section_polymorphism .
+Section section_parametrized .
+
+  Variable inputParam : infiniteNumbers -> Type .
+  Variable formula_Zero : forall (l : inputParam Zero), Type .
+  Variable formula_NextOne : forall (q : infiniteNumbers) (l : inputParam (NextOne q)), Type .
+
+  (** the precise form of the output
+        ( precisely [formula_Zero l] or [formula_NextOne q l] ? ) 
+        depends on the parameter of the input 
+        ( whether [p] is Zero or [NextOne q] ? ) *)
+  Inductive optionsPolyParam : forall (p : infiniteNumbers) (l : inputParam p), Type :=
+    Param_Zero : forall (l : inputParam Zero),
+      formula_Zero l -> optionsPolyParam Zero l
+  | Param_NextOne : forall (q : infiniteNumbers) (l : inputParam (NextOne q)),
+      formula_NextOne q l -> optionsPolyParam (NextOne q) l .
+
+  (** this is possible because the parameters [infiniteNumbers] is computational , 
+        its elements can be matched/decided along forms/constructors *)
+  Definition structuredOptionsPolyParam :
+    forall (p : infiniteNumbers) (l : inputParam p), Type .
+  Proof .
+    intros p . case p (** because [infiniteNumbers] is computational *) .
+    - exact formula_Zero.
+    - exact formula_NextOne .
+  Defined .
+
+  (** this is the inversion lemma for [optionsPolyParam] *)
+  Definition structuredOptionsPolyParam_of_optionsPolyParam :
+    forall (p : infiniteNumbers) (l : inputParam p) (f : optionsPolyParam p l),
+      structuredOptionsPolyParam p l .
+  Proof.
+    intros p l f .
+    refine (match f with
+              Param_Zero l f => f
+            | Param_NextOne q l f => f
+            end) .
+  Defined .
+
+  (** this is the instance of the inversion lemma of [optionsPolyParam] for the parameter [Zero] *)
+  Definition formula_Zero_of_optionsPolyParam__Zero :
+    forall (l : inputParam Zero) (f : optionsPolyParam Zero l), formula_Zero l .
+  Proof .
+    intros l . exact (structuredOptionsPolyParam_of_optionsPolyParam Zero l) .
+  Defined .
+
+  (** this is the instance of the inversion lemma of [optionsPolyParam] for the parameter [NextOne _] *)
+  Definition formula_NextOne_of_optionsPolyParam__NextOne :
+    forall (q : infiniteNumbers) (l : inputParam (NextOne q)) (f : optionsPolyParam (NextOne q) l),
+      formula_NextOne q l 
+    := ( fun q l => (structuredOptionsPolyParam_of_optionsPolyParam (NextOne q) l) ) .
+  
+End section_parametrized .
+
+Section section_polymorphism_parametrized .
 
   Variable data : Type .
 
@@ -57,111 +110,6 @@ Section section_polymorphism .
   Inductive listPolyParam : infiniteNumbers -> Type := 
     Empty : listPolyParam Zero
   | JoinOne : forall (d : data) (q : infiniteNumbers) (l : listPolyParam q), listPolyParam (NextOne q) .
-
-  Section section_polymorphism_parametrized .
-
-    Variable formula_Zero : forall (l : listPolyParam Zero), Type .
-    Variable formula_NextOne : forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)), Type .
-
-    (** the precise form of the output
-        ( precisely [formula_Zero l] or [formula_NextOne q l] ? ) 
-        depends on the parameter of the input 
-        ( whether [p] is Zero or [NextOne q] ? ) *)
-    Inductive optionsPolyParam : forall (p : infiniteNumbers) (l : listPolyParam p), Type :=
-      Param_Zero : forall (l : listPolyParam Zero),
-        formula_Zero l -> optionsPolyParam Zero l
-    | Param_NextOne : forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)),
-        formula_NextOne q l -> optionsPolyParam (NextOne q) l .
-
-    Inductive optionsPolyParam_Zero : forall (l : listPolyParam Zero), optionsPolyParam Zero l -> Type :=
-    | Param_Zero_optionsPolyParam_Zero : forall (l : listPolyParam Zero) (f : formula_Zero l),
-        optionsPolyParam_Zero l (Param_Zero l f : optionsPolyParam Zero l) .
-
-    Inductive optionsPolyParam_NextOne : forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)),
-        optionsPolyParam (NextOne q) l -> Type :=
-    | Param_NextOne_optionsPolyParam_NextOne :
-        forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)) (f : formula_NextOne q l),
-        optionsPolyParam_NextOne q l (Param_NextOne q l f : optionsPolyParam (NextOne q) l) .
-
-    (** this is the easy inversion lemma for [optionsPolyParam_Zero] *)
-    Definition formula_Zero_of_optionsPolyParam_Zero : forall (l : listPolyParam Zero) (f : optionsPolyParam Zero l),
-        optionsPolyParam_Zero l f -> formula_Zero l .
-    Proof.
-      intros l f f_optionsPolyParam_Zero .
-      case f_optionsPolyParam_Zero . clear f_optionsPolyParam_Zero f l . intros l f . Undo 3 .
-      destruct f_optionsPolyParam_Zero as [ l f ] .
-      exact f .
-    Defined.
-
-    (** this is the easy inversion lemma for [optionsPolyParam_NextOne] *)
-    Definition formula_NextOne_of_optionsPolyParam_NextOne :
-      forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)) (f : optionsPolyParam (NextOne q) l),
-        optionsPolyParam_NextOne q l f -> formula_NextOne q l .
-    Proof .
-      intros q l f f_optionsPolyParam_NextOne .
-      destruct f_optionsPolyParam_NextOne as [ q l f ] .
-      exact f .
-    Defined .
-
-    Section section_difficult .
-
-      (** this is possible because the parameters [infiniteNumbers] is computational , 
-        its elements can be matched/decided along forms/constructors *)
-      Definition structuredOptionsPolyParam :
-        forall (p : infiniteNumbers) (l : listPolyParam p), optionsPolyParam p l -> Type .
-      Proof .
-        intros p . case p (** because [infiniteNumbers] is computational *) .
-        - exact optionsPolyParam_Zero .
-        - exact optionsPolyParam_NextOne .
-      Defined .
-
-      (** this is the difficult inversion lemma for [optionsPolyParam] *)
-      Definition structuredOptionsPolyParam_of_optionsPolyParam :
-        forall (p : infiniteNumbers) (l : listPolyParam p) (f : optionsPolyParam p l),
-          structuredOptionsPolyParam p l f .
-      Proof.
-        intros p l f .
-        refine (match f with
-                  Param_Zero l f => Param_Zero_optionsPolyParam_Zero l f
-                | Param_NextOne q l f => Param_NextOne_optionsPolyParam_NextOne q l f
-                end) .
-      Defined .
-
-      (** instantiation of the inversion lemma
-        [structuredOptionsPolyParam_of_optionsPolyParam] for the parameter [Zero] *)
-      Definition structuredOptionsPolyParam_of_optionsPolyParam__Zero :
-        forall (l : listPolyParam Zero) (f : optionsPolyParam Zero l), optionsPolyParam_Zero l f .
-      Proof .
-        intros l . exact (structuredOptionsPolyParam_of_optionsPolyParam Zero l) .
-      Defined .
-
-      (** instantiation of the inversion lemma 
-        [structuredOptionsPolyParam_of_optionsPolyParam] for the parameter [NextOne _] *)
-      Definition structuredOptionsPolyParam_of_optionsPolyParam__NextOne :
-        forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)) (f : optionsPolyParam (NextOne q) l),
-          optionsPolyParam_NextOne q l f 
-        := ( fun q l => (structuredOptionsPolyParam_of_optionsPolyParam (NextOne q) l) ) .
-
-    End section_difficult .
-
-    (** combining the easy inversion lemma and the difficult inversion lemma for the parameter [Zero] *)
-    Corollary formula_Zero_of_optionsPolyParam__Zero : forall (l : listPolyParam Zero),
-        optionsPolyParam Zero l -> formula_Zero l .
-    Proof .
-      intros l f . apply (formula_Zero_of_optionsPolyParam_Zero l f) .
-      apply structuredOptionsPolyParam_of_optionsPolyParam__Zero .
-    Defined .
-
-    (** combining the easy inversion lemma and the difficult inversion lemma for the parameter [NextOne _] *)
-    Corollary formula_NextOne_of_optionsPolyParam__NextOne :
-      forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)),
-        optionsPolyParam (NextOne q) l -> formula_NextOne q l .
-    Proof .
-      intros q l f . apply (formula_NextOne_of_optionsPolyParam_NextOne q l f) .
-      apply structuredOptionsPolyParam_of_optionsPolyParam__NextOne .
-    Defined .
-      
-  End section_polymorphism_parametrized .
 
   Section rest_of_listPolyParam .
 
@@ -176,25 +124,25 @@ Section section_polymorphism .
       depends on the parameter of the input 
       ( whether [p] is Zero or [NextOne q] ? ) *)
     Definition rest_of_listPolyParam : forall (p : infiniteNumbers) (l : listPolyParam p),
-        optionsPolyParam formula_Zero formula_NextOne p l .
+        optionsPolyParam listPolyParam formula_Zero formula_NextOne p l .
     Proof .
       intros p l . elim l .
-      - apply (Param_Zero formula_Zero formula_NextOne) . unfold formula_Zero .
+      - apply (Param_Zero listPolyParam formula_Zero formula_NextOne) . unfold formula_Zero .
         exact Empty .
       - intros d q l' IH_l' . clear IH_l' .
-        apply (Param_NextOne formula_Zero formula_NextOne) . unfold formula_NextOne .
+        apply (Param_NextOne listPolyParam formula_Zero formula_NextOne) . unfold formula_NextOne .
         exact l' .
     Defined .
 
     Definition rest_of_listPolyParam_NextOne :
       forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)), listPolyParam q .
     Proof .
-      intros q l . apply (formula_NextOne_of_optionsPolyParam__NextOne formula_Zero formula_NextOne q l) .
+      intros q l . apply (formula_NextOne_of_optionsPolyParam__NextOne listPolyParam formula_Zero formula_NextOne q l) .
       exact (rest_of_listPolyParam (NextOne q) l) .
     Defined .
     
     Definition rest_of_listPolyParam_Zero : forall (l : listPolyParam Zero), listPolyParam Zero
-      := ( fun l => (formula_Zero_of_optionsPolyParam__Zero formula_Zero formula_NextOne l
+      := ( fun l => (formula_Zero_of_optionsPolyParam__Zero listPolyParam formula_Zero formula_NextOne l
                                                        (rest_of_listPolyParam Zero l)) ) .
 
   End rest_of_listPolyParam .
@@ -209,37 +157,37 @@ Section section_polymorphism .
       := ( fun (q : infiniteNumbers) ( _ : listPolyParam (NextOne q) ) => data ) .
 
     Fixpoint bottom_of_listPolyParam (p : infiniteNumbers) (l : listPolyParam p) {struct l} :
-      optionsPolyParam formula_Zero formula_NextOne p l .
+      optionsPolyParam listPolyParam formula_Zero formula_NextOne p l .
     Proof .
       case l .
-      - apply (Param_Zero formula_Zero formula_NextOne) . unfold formula_Zero .
+      - apply (Param_Zero listPolyParam formula_Zero formula_NextOne) . unfold formula_Zero .
         exact tt .
       - clear p l . intros dat q l' .
         case (bottom_of_listPolyParam q l').
         + clear q l' ; intros l' . intros bottom_of_listPolyParam_q_l' .
           unfold formula_Zero in bottom_of_listPolyParam_q_l' . clear bottom_of_listPolyParam_q_l' .
-          apply (Param_NextOne formula_Zero formula_NextOne) . unfold formula_NextOne .
+          apply (Param_NextOne listPolyParam formula_Zero formula_NextOne) . unfold formula_NextOne .
           exact dat .
         + clear q l' ; intros r l' . intros bottom_of_listPolyParam_q_l' .
           unfold formula_NextOne in bottom_of_listPolyParam_q_l' .
-          apply (Param_NextOne formula_Zero formula_NextOne) . unfold formula_NextOne .
+          apply (Param_NextOne listPolyParam formula_Zero formula_NextOne) . unfold formula_NextOne .
           exact bottom_of_listPolyParam_q_l' .
     Defined .
-    
+
     Definition bottom_of_listPolyParam_NextOne :
       forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)), data .
     Proof .
-      intros q l . apply (formula_NextOne_of_optionsPolyParam__NextOne formula_Zero formula_NextOne q l) .
+      intros q l . apply (formula_NextOne_of_optionsPolyParam__NextOne listPolyParam formula_Zero formula_NextOne q l) .
       exact (bottom_of_listPolyParam (NextOne q) l) .
     Defined .
 
     Definition bottom_of_listPolyParam_Zero : forall (l : listPolyParam Zero), unit
-      := ( fun l => (formula_Zero_of_optionsPolyParam__Zero formula_Zero formula_NextOne l
+      := ( fun l => (formula_Zero_of_optionsPolyParam__Zero listPolyParam formula_Zero formula_NextOne l
                                                        (bottom_of_listPolyParam Zero l)) ) .
 
   End bottom_of_listPolyParam .
 
-End section_polymorphism .
+End section_polymorphism_parametrized .
 
 About formula_Zero . About rest_of_listPolyParam_NextOne .
 
