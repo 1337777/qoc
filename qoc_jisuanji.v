@@ -1,10 +1,61 @@
 From Qoc Require Import Jisuanji .
 
-Module PolymorphismInductive .
+Module PolymorphismInductiveImplicitNotations .
 
 Inductive listPoly (data : Type) : Type := 
   Empty : listPoly data
 | JoinOne : forall (d : data) (l : listPoly data), listPoly data.
+
+Definition rest_of_listPoly : forall (data : Type) (l : listPoly data), listPoly data .
+Proof .
+  intros data l . destruct l as [ | dat l' ] .
+  - exact (Empty data) .
+  - exact l' .
+Defined .
+
+Inductive binary : Type :=
+  true : binary
+| false : binary .
+
+Eval compute in
+  (rest_of_listPoly binary (JoinOne binary false
+                                          (JoinOne binary false
+                                                   (JoinOne binary true
+                                                            (Empty binary))))) .
+
+Inductive infiniteNumbers : Type :=
+  Zero : infiniteNumbers
+| NextOne : infiniteNumbers -> infiniteNumbers .
+
+Eval compute in
+  (rest_of_listPoly infiniteNumbers (JoinOne infiniteNumbers (NextOne (NextOne Zero))
+                                          (JoinOne infiniteNumbers Zero
+                                                   (JoinOne infiniteNumbers (NextOne Zero)
+                                                            (Empty infiniteNumbers))))) .
+
+
+Check (JoinOne binary true (Empty binary)).
+Check (JoinOne _ true (Empty _)).
+Check (JoinOne _ (NextOne (NextOne Zero)) (Empty _)).
+(**MEMO: polymorphism-objects can be inferred-implicit , via [Notation] command *)
+Notation "d :: l" := (JoinOne _ d l) .
+Notation "!00!" := (Empty _) .
+Check ( true :: !00! ).
+Check ( (NextOne (NextOne Zero)) :: !00! ).
+
+
+Eval compute in
+  (rest_of_listPoly _ ( false ::  false ::  true :: !00! ) ) .
+Eval compute in
+  (rest_of_listPoly _ ( (NextOne (NextOne Zero)) :: Zero :: (NextOne Zero) :: !00! ) ) .
+Notation "'rest'" := ( rest_of_listPoly _ ) .
+Eval compute in
+  (rest ( false ::  false ::  true :: !00! ) ) .
+(**MEMO: polymorphism-objects can be inferred-implicit , via [Arguments] command *)
+Arguments rest_of_listPoly [data] l .
+Check (rest_of_listPoly ( false ::  false ::  true :: !00! ) ) .
+Check (@rest_of_listPoly _ ( false ::  false ::  true :: !00! ) ) .
+
 
 Section section_polymorphism .
 
@@ -20,18 +71,38 @@ End section_polymorphism .
 
 Print optionPoly .  Print unit .
 
+Set Implicit Arguments .
+
 (** in some sense , the precise form/type of the output 
     ( precisely [unit] or [data] ? ) depends on the (parameter of the) input
     ( whether [l] is invalid or valid ? ) *)
 Definition top_of_listPoly : forall (data : Type) (l : listPoly data), optionPoly data.
 Proof .
-  intros data l . elim l .
+  intros data l . case l .
   - exact (Input_Invalid data). 
-  - intros d l' IH_l' . clear IH_l' .
-    exact (Input_Valid data d) .
+  - intros dat l' .
+    apply (Input_Valid data) .
+    exact dat .
 Defined .
 
-End PolymorphismInductive .
+Eval compute in
+  (top_of_listPoly ( false ::  false ::  true :: !00! ) ) .
+
+Fixpoint bottom_of_listPoly (data : Type) (l : listPoly data) {struct l} : optionPoly data .
+Proof .
+  destruct l as [ | dat l' ] .
+  - exact (Input_Invalid data) .
+  - case (bottom_of_listPoly data l') .
+    + exact (Input_Valid data dat).
+    + clear l' . intros bottom_of_listPoly_data_l' .
+      apply (Input_Valid data).
+      exact bottom_of_listPoly_data_l' .
+Defined .
+
+Eval compute in
+  (bottom_of_listPoly ( false ::  false ::  true :: !00! )) .
+
+End PolymorphismInductiveImplicitNotations .
 
 
 
@@ -39,7 +110,7 @@ End PolymorphismInductive .
 
 
 
-Module PolymorphismParametrizedInductive .
+Module PolymorphismParametrizedInductiveImplicitNotations .
 (** memo that in some instances such as [top_of_listPoly] above , 
     then the parameters of the inputs is the same as the inputs *)
 
@@ -126,30 +197,63 @@ Section section_polymorphism_parametrized .
     Definition rest_of_listPolyParam : forall (p : infiniteNumbers) (l : listPolyParam p),
         optionsPolyParam listPolyParam formula_Zero formula_NextOne p l .
     Proof .
-      intros p l . elim l .
+      intros p l . case l .
       - apply (Param_Zero listPolyParam formula_Zero formula_NextOne) . unfold formula_Zero .
         exact Empty .
-      - intros d q l' IH_l' . clear IH_l' .
+      - intros d q l' . 
         apply (Param_NextOne listPolyParam formula_Zero formula_NextOne) . unfold formula_NextOne .
         exact l' .
     Defined .
 
-    Definition rest_of_listPolyParam_NextOne :
-      forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)), listPolyParam q .
+    Definition rest_of_listPolyParam_Zero : forall (l : listPolyParam Zero), listPolyParam Zero .
     Proof .
-      intros q l . apply (formula_NextOne_of_optionsPolyParam__NextOne listPolyParam formula_Zero formula_NextOne q l) .
-      exact (rest_of_listPolyParam (NextOne q) l) .
+      intros l .
+      apply(formula_Zero_of_optionsPolyParam__Zero listPolyParam formula_Zero formula_NextOne l).
+      exact (rest_of_listPolyParam Zero l) .
     Defined .
-    
-    Definition rest_of_listPolyParam_Zero : forall (l : listPolyParam Zero), listPolyParam Zero
-      := ( fun l => (formula_Zero_of_optionsPolyParam__Zero listPolyParam formula_Zero formula_NextOne l
-                                                       (rest_of_listPolyParam Zero l)) ) .
+
+    Definition rest_of_listPolyParam_NextOne :
+      forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)), listPolyParam q 
+      := ( fun q l => (formula_NextOne_of_optionsPolyParam__NextOne listPolyParam formula_Zero formula_NextOne q l
+                                                               (rest_of_listPolyParam (NextOne q) l)) ) .
 
   End rest_of_listPolyParam .
 
-  Section bottom_of_listPolyParam .
+  Section top_of_listPolyParam .
 
     Print unit .
+    Let formula_Zero : forall (l : listPolyParam Zero), Type
+      := ( fun ( _ : listPolyParam Zero) => unit ) .
+
+    Let formula_NextOne : forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)), Type
+      := ( fun (q : infiniteNumbers) ( _ : listPolyParam (NextOne q) ) => data ) .
+
+    Definition top_of_listPolyParam : forall (p : infiniteNumbers) (l : listPolyParam p),
+      optionsPolyParam listPolyParam formula_Zero formula_NextOne p l .
+    Proof .
+      intros p l . case l .
+      - apply (Param_Zero listPolyParam formula_Zero formula_NextOne) . unfold formula_Zero .
+        exact tt .
+      - intros dat q l' .
+        apply (Param_NextOne listPolyParam formula_Zero formula_NextOne) . unfold formula_NextOne .
+        exact dat .
+    Defined .
+
+    Definition top_of_listPolyParam_NextOne :
+      forall (q : infiniteNumbers) (l : listPolyParam (NextOne q)), data .
+    Proof .
+      intros q l . apply (formula_NextOne_of_optionsPolyParam__NextOne listPolyParam formula_Zero formula_NextOne q l) .
+      exact (top_of_listPolyParam (NextOne q) l) .
+    Defined .
+
+    Definition top_of_listPolyParam_Zero : forall (l : listPolyParam Zero), unit
+      := ( fun l => (formula_Zero_of_optionsPolyParam__Zero listPolyParam formula_Zero formula_NextOne l
+                                                       (top_of_listPolyParam Zero l)) ) .
+
+  End top_of_listPolyParam .
+
+  Section bottom_of_listPolyParam .
+
     Let formula_Zero : forall (l : listPolyParam Zero), Type
       := ( fun ( _ : listPolyParam Zero) => unit ) .
 
@@ -203,15 +307,40 @@ Eval compute in
                                                             (Empty binary))))) .
 Eval compute in (rest_of_listPolyParam_Zero binary (Empty binary)) .
 
+
+Check (JoinOne binary true Zero (Empty binary)) .
+Check (JoinOne _ true Zero (Empty _)) .
+Check (JoinOne _ true _ (Empty _)) .
+(**MEMO: parameters can also be inferred-implicit , in addition to polymorphism-objects , via [Notation] command *)
+Notation "d :: l" := (JoinOne _ d _ l) .
+Notation "!00!" := (Empty _) .
+Check ( true :: !00! ).
+
+
+Eval compute in
+  (rest_of_listPolyParam_NextOne _ _ ( false ::  false ::  true :: !00! ) ) .
+Notation "'rest'" := ( rest_of_listPolyParam_NextOne _ _ ) .
+Eval compute in
+  (rest ( false ::  false ::  true :: !00! ) ) .
+(**MEMO: parameters can also be inferred-implicit , in addition to polymorphism-objects  , via [Arguments] command *)
+Arguments rest_of_listPolyParam_NextOne [data] [q] l .
+Eval compute in
+  (rest_of_listPolyParam_NextOne ( false ::  false ::  true :: !00! ) ) .
+Eval compute in
+  (@rest_of_listPolyParam_NextOne _ _ ( false ::  false ::  true :: !00! ) ) .
+
+
+Eval compute in
+  (top_of_listPolyParam_NextOne _ _
+                                 ( false ::  false ::  true :: !00! )) .
+Eval compute in (top_of_listPolyParam_Zero binary ( !00! )  ) .
+
 Eval compute in
   (bottom_of_listPolyParam_NextOne binary (NextOne (NextOne Zero))
-                                 (JoinOne binary false (NextOne (NextOne Zero))
-                                          (JoinOne binary false (NextOne Zero)
-                                                   (JoinOne binary true Zero
-                                                            (Empty binary))))) .
+                                 ( false ::  false ::  true :: !00! )) .
 Eval compute in (bottom_of_listPolyParam_Zero binary (Empty binary)) .
 
-End PolymorphismParametrizedInductive .
+End PolymorphismParametrizedInductiveImplicitNotations .
 
 
 
