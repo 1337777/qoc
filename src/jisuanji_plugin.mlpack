@@ -1,9 +1,11 @@
 G_jisuanji_constr
 G_jisuanji_coretactics
 G_jisuanji_tactic
+Jisuanji_extratactics
 G_jisuanji_proofs
 G_jisuanji_vernac
 G_jisuanji
 Jisuanji_ppconstr
 Jisuanji_printmod
 Jisuanji_prettyp
+Jisuanji_vernacentries

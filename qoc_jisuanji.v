@@ -1,4 +1,344 @@
 From Qoc Require Import Jisuanji .
+  
+包裹 多态_归纳的_隐含_符号 .
+
+归纳的 序列'多态 (数据 : 类型) : 类型 := 
+  空的 : 序列'多态 数据
+| 加入一个 : 用 (d : 数据) (l : 序列'多态 数据), 序列'多态 数据.
+
+定义 剩下_对于_序列'多态 : 用 (数据 : 类型) (l : 序列'多态 数据), 序列'多态 数据 .
+证明 .
+  介绍们 数据 l . 解构 l 如 [ | dat l' ] .
+  - 确切 (空的 数据) .
+  - 确切 l' .
+定义了 .
+
+归纳的 二进制 : 类型 :=
+  真 : 二进制
+| 假 : 二进制 .
+
+计算 (剩下_对于_序列'多态 二进制 (加入一个 二进制 假
+                                          (加入一个 二进制 假
+                                                   (加入一个 二进制 真
+                                                            (空的 二进制))))) .
+
+归纳的 无限数字 : 类型 :=
+  零 : 无限数字
+| 下一个 : 无限数字 -> 无限数字 .
+
+计算 (剩下_对于_序列'多态 无限数字 (加入一个 无限数字 (下一个 (下一个 零))
+                                          (加入一个 无限数字 零
+                                                   (加入一个 无限数字 (下一个 零)
+                                                            (空的 无限数字))))) .
+
+
+计算 (加入一个 二进制 真 (空的 二进制)).
+计算 (加入一个 _ 真 (空的 _)).
+计算 (加入一个 _ (下一个 (下一个 零)) (空的 _)).
+(**MEMO: 多态-objects can be inferred-implicit , via [符号] command *)
+符号 "d :: l" := (加入一个 _ d l) .
+符号 "!00!" := (空的 _) .
+计算 ( 真 :: !00! ).
+计算 ( (下一个 (下一个 零)) :: !00! ).
+
+
+计算 (剩下_对于_序列'多态 _ ( 假 ::  假 ::  真 :: !00! ) ) .
+计算 (剩下_对于_序列'多态 _ ( (下一个 (下一个 零)) :: 零 :: (下一个 零) :: !00! ) ) .
+符号 "'剩下'" := ( 剩下_对于_序列'多态 _ ) .
+计算 (剩下 ( 假 ::  假 ::  真 :: !00! ) ) .
+(**MEMO: 多态-objects can be inferred-implicit , via [键入] command *)
+键入 剩下_对于_序列'多态 [数据] l .
+计算 (剩下_对于_序列'多态 ( 假 ::  假 ::  真 :: !00! ) ) .
+
+
+部分 部分_多态 .
+
+  变量 数据 : 类型 .
+
+  (** the precise form/type of the output 
+      ( precisely [单位] or [数据] ? ) depends on the input *)
+  归纳的 选项'多态 : 类型 := 
+    键入_无效 : (* 单位 -> *) 选项'多态
+  | 键入_效 : 数据 -> 选项'多态 .
+
+结束 部分_多态 .
+
+打印 选项'多态 . 打印 单位 . 打印 unit .
+
+设置 隐含 键入 .
+
+(** in some sense , the precise form/type of the output 
+    ( precisely [单位] or [数据] ? ) depends on the (parameter of the) input
+    ( whether [l] is invalid or valid ? ) *)
+定义 顶部_对于_序列'多态 : 用 (数据 : 类型) (l : 序列'多态 数据), 选项'多态 数据.
+证明 .
+  介绍们 数据 l . 例子 l .
+  - 确切 (键入_无效 数据). 
+  - 介绍们 dat l' .
+    应用 (键入_效 数据) .
+    确切 dat .
+定义了 .
+
+计算 (顶部_对于_序列'多态 ( 假 ::  假 ::  真 :: !00! ) ) .
+
+固定点 底部_对于_序列'多态 (数据 : 类型) (l : 序列'多态 数据) { 构 l } : 选项'多态 数据 .
+证明 .
+  解构 l 如 [ | dat l' ] .
+  - 确切 (键入_无效 数据) .
+  - 例子 (底部_对于_序列'多态 数据 l') .
+    + 确切 (键入_效 数据 dat).
+    + 清除 l' . 介绍们 底部_对于_序列'多态_数据_l' .
+      应用 (键入_效 数据).
+      确切 底部_对于_序列'多态_数据_l' .
+定义了 .
+
+计算 (底部_对于_序列'多态 ( 假 ::  假 ::  真 :: !00! )) .
+
+
+结束 多态_归纳的_隐含_符号 .
+
+
+
+(** ------------------------------------------------------------------------- *)
+
+
+
+包裹 多态'参数化了'归纳的隐含符号s .
+(** memo that in some instances such as [顶部_对于_序列'多态] above , 
+    then the parameters of the inputs is the same as the inputs *)
+
+(** the parameters [无限数字] is computational , 
+    its elements can be matched/decided along forms/constructors *)
+归纳的 无限数字 : 类型 :=
+  零 : 无限数字
+| 下一个 : 无限数字 -> 无限数字 .
+
+部分 部分_参数化了 .
+
+  变量 input参数 : 无限数字 -> 类型 .
+  变量 公式_零 : 用 (l : input参数 零), 类型 .
+  变量 公式_下一个 : 用 (q : 无限数字) (l : input参数 (下一个 q)), 类型 .
+
+  (** the precise form of the output
+        ( precisely [公式_零 l] or [公式_下一个 q l] ? ) 
+        depends on the parameter of the input 
+        ( whether [p] is 零 or [下一个 q] ? ) *)
+  归纳的 选项们'多态'参数 : 用 (p : 无限数字) (l : input参数 p), 类型 :=
+    参数_零 : 用 (l : input参数 零),
+      公式_零 l -> 选项们'多态'参数 零 l
+  | 参数_下一个 : 用 (q : 无限数字) (l : input参数 (下一个 q)),
+      公式_下一个 q l -> 选项们'多态'参数 (下一个 q) l .
+
+  (** this is possible because the parameters [无限数字] is computational , 
+        its elements can be matched/decided along forms/constructors *)
+  定义 structured选项们'多态'参数 :
+    用 (p : 无限数字) (l : input参数 p), 类型 .
+  证明 .
+    介绍们 p . 例子 p (** because [无限数字] is computational *) .
+    - 确切 公式_零.
+    - 确切 公式_下一个 .
+  定义了 .
+
+  (** this is the inversion lemma for [选项们'多态'参数] *)
+  定义 structured选项们'多态'参数_对于_选项们'多态'参数 :
+    用 (p : 无限数字) (l : input参数 p) (f : 选项们'多态'参数 p l),
+      structured选项们'多态'参数 p l .
+  证明.
+    介绍们 p l f .
+    加细 (匹配 f 与
+              参数_零 l f => f
+            | 参数_下一个 q l f => f
+            结束) .
+  定义了 .
+
+  (** this is the instance of the inversion lemma of [选项们'多态'参数] for the parameter [零] *)
+  定义 公式_零_对于_选项们'多态'参数__零 :
+    用 (l : input参数 零) (f : 选项们'多态'参数 零 l), 公式_零 l .
+  证明 .
+    介绍们 l . 确切 (structured选项们'多态'参数_对于_选项们'多态'参数 零 l) .
+  定义了 .
+
+  (** this is the instance of the inversion lemma of [选项们'多态'参数] for the parameter [下一个 _] *)
+  定义 公式_下一个_对于_选项们'多态'参数__下一个 :
+    用 (q : 无限数字) (l : input参数 (下一个 q)) (f : 选项们'多态'参数 (下一个 q) l),
+      公式_下一个 q l 
+    := ( 作用 q l => (structured选项们'多态'参数_对于_选项们'多态'参数 (下一个 q) l) ) .
+  
+结束 部分_参数化了 .
+
+部分 部分_多态_参数化了 .
+
+  变量 数据 : 类型 .
+
+  (**MEMO: this could be presented/accessed through some interface for abstract 数据 types *)
+  归纳的 序列'多态'参数 : 无限数字 -> 类型 := 
+    空的 : 序列'多态'参数 零
+  | 加入一个 : 用 (d : 数据) (q : 无限数字) (l : 序列'多态'参数 q), 序列'多态'参数 (下一个 q) .
+
+  部分 剩下_对于_序列'多态'参数 .
+
+    让 公式_零 : 用 (l : 序列'多态'参数 零), 类型
+      := ( 作用 (l : 序列'多态'参数 零) => 序列'多态'参数 零 ) .
+
+    让 公式_下一个 : 用 (q : 无限数字) (l : 序列'多态'参数 (下一个 q)), 类型
+      := ( 作用 (q : 无限数字) ( _ : 序列'多态'参数 (下一个 q) ) => 序列'多态'参数 q ) .
+
+    (** the precise form of the output
+      ( precisely [公式_零 l] or [公式_下一个 q l] ? ) 
+      depends on the parameter of the input 
+      ( whether [p] is 零 or [下一个 q] ? ) *)
+    定义 剩下_对于_序列'多态'参数 : 用 (p : 无限数字) (l : 序列'多态'参数 p),
+        选项们'多态'参数 序列'多态'参数 公式_零 公式_下一个 p l .
+    证明 .
+      介绍们 p l . 例子 l .
+      - 应用 (参数_零 序列'多态'参数 公式_零 公式_下一个) . 展开 公式_零 .
+        确切 空的 .
+      - 介绍们 d q l' . 
+        应用 (参数_下一个 序列'多态'参数 公式_零 公式_下一个) . 展开 公式_下一个 .
+        确切 l' .
+    定义了 .
+
+    定义 剩下_对于_序列'多态'参数_零 : 用 (l : 序列'多态'参数 零), 序列'多态'参数 零 .
+    证明 .
+      介绍们 l .
+      应用(公式_零_对于_选项们'多态'参数__零 序列'多态'参数 公式_零 公式_下一个 l).
+      确切 (剩下_对于_序列'多态'参数 零 l) .
+    定义了 .
+
+    定义 剩下_对于_序列'多态'参数_下一个 :
+      用 (q : 无限数字) (l : 序列'多态'参数 (下一个 q)), 序列'多态'参数 q 
+      := ( 作用 q l => (公式_下一个_对于_选项们'多态'参数__下一个 序列'多态'参数 公式_零 公式_下一个 q l
+                                                               (剩下_对于_序列'多态'参数 (下一个 q) l)) ) .
+
+  结束 剩下_对于_序列'多态'参数 .
+
+  部分 顶部_对于_序列'多态'参数 .
+
+    打印 单位 . 打印 unit .
+    让 公式_零 : 用 (l : 序列'多态'参数 零), 类型
+      := ( 作用 ( _ : 序列'多态'参数 零) => 单位 ) .
+
+    让 公式_下一个 : 用 (q : 无限数字) (l : 序列'多态'参数 (下一个 q)), 类型
+      := ( 作用 (q : 无限数字) ( _ : 序列'多态'参数 (下一个 q) ) => 数据 ) .
+
+    定义 顶部_对于_序列'多态'参数 : 用 (p : 无限数字) (l : 序列'多态'参数 p),
+      选项们'多态'参数 序列'多态'参数 公式_零 公式_下一个 p l .
+    证明 .
+      介绍们 p l . 例子 l .
+      - 应用 (参数_零 序列'多态'参数 公式_零 公式_下一个) . 展开 公式_零 .
+        确切 单 .
+      - 介绍们 dat q l' .
+        应用 (参数_下一个 序列'多态'参数 公式_零 公式_下一个) . 展开 公式_下一个 .
+        确切 dat .
+    定义了 .
+
+    定义 顶部_对于_序列'多态'参数_下一个 :
+      用 (q : 无限数字) (l : 序列'多态'参数 (下一个 q)), 数据 .
+    证明 .
+      介绍们 q l . 应用 (公式_下一个_对于_选项们'多态'参数__下一个 序列'多态'参数 公式_零 公式_下一个 q l) .
+      确切 (顶部_对于_序列'多态'参数 (下一个 q) l) .
+    定义了 .
+
+    定义 顶部_对于_序列'多态'参数_零 : 用 (l : 序列'多态'参数 零), 单位
+      := ( 作用 l => (公式_零_对于_选项们'多态'参数__零 序列'多态'参数 公式_零 公式_下一个 l
+                                                       (顶部_对于_序列'多态'参数 零 l)) ) .
+
+  结束 顶部_对于_序列'多态'参数 .
+
+  部分 底部_对于_序列'多态'参数 .
+
+    让 公式_零 : 用 (l : 序列'多态'参数 零), 类型
+      := ( 作用 ( _ : 序列'多态'参数 零) => 单位 ) .
+
+    让 公式_下一个 : 用 (q : 无限数字) (l : 序列'多态'参数 (下一个 q)), 类型
+      := ( 作用 (q : 无限数字) ( _ : 序列'多态'参数 (下一个 q) ) => 数据 ) .
+
+    固定点 底部_对于_序列'多态'参数 (p : 无限数字) (l : 序列'多态'参数 p) { 构 l } :
+      选项们'多态'参数 序列'多态'参数 公式_零 公式_下一个 p l .
+    证明 .
+      例子 l .
+      - 应用 (参数_零 序列'多态'参数 公式_零 公式_下一个) . 展开 公式_零 .
+        确切 单 .
+      - 清除 p l . 介绍们 dat q l' .
+        例子 (底部_对于_序列'多态'参数 q l').
+        + 清除 q l' ; 介绍们 l' . 介绍们 底部_对于_序列'多态'参数_q_l' .
+          展开 公式_零 在 底部_对于_序列'多态'参数_q_l' . 清除 底部_对于_序列'多态'参数_q_l' .
+          应用 (参数_下一个 序列'多态'参数 公式_零 公式_下一个) . 展开 公式_下一个 .
+          确切 dat .
+        + 清除 q l' ; 介绍们 r l' . 介绍们 底部_对于_序列'多态'参数_q_l' .
+          展开 公式_下一个 在 底部_对于_序列'多态'参数_q_l' .
+          应用 (参数_下一个 序列'多态'参数 公式_零 公式_下一个) . 展开 公式_下一个 .
+          确切 底部_对于_序列'多态'参数_q_l' .
+    定义了 .
+
+    定义 底部_对于_序列'多态'参数_下一个 :
+      用 (q : 无限数字) (l : 序列'多态'参数 (下一个 q)), 数据 .
+    证明 .
+      介绍们 q l . 应用 (公式_下一个_对于_选项们'多态'参数__下一个 序列'多态'参数 公式_零 公式_下一个 q l) .
+      确切 (底部_对于_序列'多态'参数 (下一个 q) l) .
+    定义了 .
+
+    定义 底部_对于_序列'多态'参数_零 : 用 (l : 序列'多态'参数 零), 单位
+      := ( 作用 l => (公式_零_对于_选项们'多态'参数__零 序列'多态'参数 公式_零 公式_下一个 l
+                                                       (底部_对于_序列'多态'参数 零 l)) ) .
+
+  结束 底部_对于_序列'多态'参数 .
+
+结束 部分_多态_参数化了 .
+
+关于 公式_零 . 关于 剩下_对于_序列'多态'参数_下一个 .
+
+归纳的 二进制 : 类型 :=
+  真 : 二进制
+| 假 : 二进制 .
+
+计算 (剩下_对于_序列'多态'参数_下一个 二进制 (下一个 (下一个 零))
+                                 (加入一个 二进制 假 (下一个 (下一个 零))
+                                          (加入一个 二进制 假 (下一个 零)
+                                                   (加入一个 二进制 真 零
+                                                            (空的 二进制))))) .
+评估 计算 在 (剩下_对于_序列'多态'参数_零 二进制 (空的 二进制)) .
+
+
+计算 (加入一个 二进制 真 零 (空的 二进制)) .
+计算 (加入一个 _ 真 零 (空的 _)) .
+计算 (加入一个 _ 真 _ (空的 _)) .
+(**MEMO: parameters can also be inferred-implicit , in addition to 多态-objects , via [符号] command *)
+符号 "d :: l" := (加入一个 _ d _ l) .
+符号 "!00!" := (空的 _) .
+计算 ( 真 :: !00! ).
+
+
+计算 (剩下_对于_序列'多态'参数_下一个 _ _ ( 假 ::  假 ::  真 :: !00! ) ) .
+符号 "'剩下'" := ( 剩下_对于_序列'多态'参数_下一个 _ _ ) .
+计算 (剩下 ( 假 ::  假 ::  真 :: !00! ) ) .
+(**MEMO: parameters can also be inferred-implicit , in addition to 多态-objects  , via [键入] command *)
+键入 剩下_对于_序列'多态'参数_下一个 [数据] [q] l .
+计算 (剩下_对于_序列'多态'参数_下一个 ( 假 ::  假 ::  真 :: !00! ) ) .
+
+
+计算 (顶部_对于_序列'多态'参数_下一个 _ _ ( 假 ::  假 ::  真 :: !00! )) .
+计算 (顶部_对于_序列'多态'参数_零 二进制 ( !00! )  ) .
+
+计算 (底部_对于_序列'多态'参数_下一个 二进制 (下一个 (下一个 零))
+                                 ( 假 ::  假 ::  真 :: !00! )) .
+计算 (底部_对于_序列'多态'参数_零 二进制 (空的 二进制)) .
+
+结束 多态'参数化了'归纳的隐含符号s .
+
+
+
+(** -trans------------------------------------------------------------------------ *)
+
+(*
+The finite binary values are : true ; false .
+The infinite numbers are : 1 ; 2 = next 1 ; 3 = next 2 ; 4 = next 3 ; ....
+The numbers cannot carry additional data .
+The sequences can carry data . For example , this data may be animals : [ ] ; [ cat ] ; [ cat , dog ] ; [ cat , dog , fish ] ...
+For example , this data of the sequence may be colors : [ ] ; [ red ] ; [ red , blue ] ; [ red , blue , gold ] ...
+This idea that the sequences may contain data of many forms is named : polymorphism .
+
+*)
 
 Module PolymorphismInductiveImplicitNotations .
 
@@ -17,8 +357,7 @@ Inductive binary : Type :=
   true : binary
 | false : binary .
 
-Eval compute in
-  (rest_of_listPoly binary (JoinOne binary false
+Compute (rest_of_listPoly binary (JoinOne binary false
                                           (JoinOne binary false
                                                    (JoinOne binary true
                                                             (Empty binary))))) .
@@ -27,34 +366,29 @@ Inductive infiniteNumbers : Type :=
   Zero : infiniteNumbers
 | NextOne : infiniteNumbers -> infiniteNumbers .
 
-Eval compute in
-  (rest_of_listPoly infiniteNumbers (JoinOne infiniteNumbers (NextOne (NextOne Zero))
+Compute (rest_of_listPoly infiniteNumbers (JoinOne infiniteNumbers (NextOne (NextOne Zero))
                                           (JoinOne infiniteNumbers Zero
                                                    (JoinOne infiniteNumbers (NextOne Zero)
                                                             (Empty infiniteNumbers))))) .
 
 
-Check (JoinOne binary true (Empty binary)).
-Check (JoinOne _ true (Empty _)).
-Check (JoinOne _ (NextOne (NextOne Zero)) (Empty _)).
+Compute (JoinOne binary true (Empty binary)).
+Compute (JoinOne _ true (Empty _)).
+Compute (JoinOne _ (NextOne (NextOne Zero)) (Empty _)).
 (**MEMO: polymorphism-objects can be inferred-implicit , via [Notation] command *)
 Notation "d :: l" := (JoinOne _ d l) .
 Notation "!00!" := (Empty _) .
-Check ( true :: !00! ).
-Check ( (NextOne (NextOne Zero)) :: !00! ).
+Compute ( true :: !00! ).
+Compute ( (NextOne (NextOne Zero)) :: !00! ).
 
 
-Eval compute in
-  (rest_of_listPoly _ ( false ::  false ::  true :: !00! ) ) .
-Eval compute in
-  (rest_of_listPoly _ ( (NextOne (NextOne Zero)) :: Zero :: (NextOne Zero) :: !00! ) ) .
+Compute (rest_of_listPoly _ ( false ::  false ::  true :: !00! ) ) .
+Compute (rest_of_listPoly _ ( (NextOne (NextOne Zero)) :: Zero :: (NextOne Zero) :: !00! ) ) .
 Notation "'rest'" := ( rest_of_listPoly _ ) .
-Eval compute in
-  (rest ( false ::  false ::  true :: !00! ) ) .
+Compute (rest ( false ::  false ::  true :: !00! ) ) .
 (**MEMO: polymorphism-objects can be inferred-implicit , via [Arguments] command *)
 Arguments rest_of_listPoly [data] l .
-Check (rest_of_listPoly ( false ::  false ::  true :: !00! ) ) .
-Check (@rest_of_listPoly _ ( false ::  false ::  true :: !00! ) ) .
+Compute (rest_of_listPoly ( false ::  false ::  true :: !00! ) ) .
 
 
 Section section_polymorphism .
@@ -85,8 +419,7 @@ Proof .
     exact dat .
 Defined .
 
-Eval compute in
-  (top_of_listPoly ( false ::  false ::  true :: !00! ) ) .
+Compute (top_of_listPoly ( false ::  false ::  true :: !00! ) ) .
 
 Fixpoint bottom_of_listPoly (data : Type) (l : listPoly data) {struct l} : optionPoly data .
 Proof .
@@ -99,8 +432,7 @@ Proof .
       exact bottom_of_listPoly_data_l' .
 Defined .
 
-Eval compute in
-  (bottom_of_listPoly ( false ::  false ::  true :: !00! )) .
+Compute (bottom_of_listPoly ( false ::  false ::  true :: !00! )) .
 
 End PolymorphismInductiveImplicitNotations .
 
@@ -299,46 +631,37 @@ Inductive binary : Type :=
   true : binary
 | false : binary .
 
-Eval compute in
-  (rest_of_listPolyParam_NextOne binary (NextOne (NextOne Zero))
+Compute (rest_of_listPolyParam_NextOne binary (NextOne (NextOne Zero))
                                  (JoinOne binary false (NextOne (NextOne Zero))
                                           (JoinOne binary false (NextOne Zero)
                                                    (JoinOne binary true Zero
                                                             (Empty binary))))) .
-Eval compute in (rest_of_listPolyParam_Zero binary (Empty binary)) .
+Compute (rest_of_listPolyParam_Zero binary (Empty binary)) .
 
 
-Check (JoinOne binary true Zero (Empty binary)) .
-Check (JoinOne _ true Zero (Empty _)) .
-Check (JoinOne _ true _ (Empty _)) .
+Compute (JoinOne binary true Zero (Empty binary)) .
+Compute (JoinOne _ true Zero (Empty _)) .
+Compute (JoinOne _ true _ (Empty _)) .
 (**MEMO: parameters can also be inferred-implicit , in addition to polymorphism-objects , via [Notation] command *)
 Notation "d :: l" := (JoinOne _ d _ l) .
 Notation "!00!" := (Empty _) .
-Check ( true :: !00! ).
+Compute ( true :: !00! ).
 
 
-Eval compute in
-  (rest_of_listPolyParam_NextOne _ _ ( false ::  false ::  true :: !00! ) ) .
+Compute (rest_of_listPolyParam_NextOne _ _ ( false ::  false ::  true :: !00! ) ) .
 Notation "'rest'" := ( rest_of_listPolyParam_NextOne _ _ ) .
-Eval compute in
-  (rest ( false ::  false ::  true :: !00! ) ) .
+Compute (rest ( false ::  false ::  true :: !00! ) ) .
 (**MEMO: parameters can also be inferred-implicit , in addition to polymorphism-objects  , via [Arguments] command *)
 Arguments rest_of_listPolyParam_NextOne [data] [q] l .
-Eval compute in
-  (rest_of_listPolyParam_NextOne ( false ::  false ::  true :: !00! ) ) .
-Eval compute in
-  (@rest_of_listPolyParam_NextOne _ _ ( false ::  false ::  true :: !00! ) ) .
+Compute (rest_of_listPolyParam_NextOne ( false ::  false ::  true :: !00! ) ) .
 
-
-Eval compute in
-  (top_of_listPolyParam_NextOne _ _
+Compute (top_of_listPolyParam_NextOne _ _
                                  ( false ::  false ::  true :: !00! )) .
-Eval compute in (top_of_listPolyParam_Zero binary ( !00! )  ) .
+Compute (top_of_listPolyParam_Zero binary ( !00! )  ) .
 
-Eval compute in
-  (bottom_of_listPolyParam_NextOne binary (NextOne (NextOne Zero))
+Compute (bottom_of_listPolyParam_NextOne binary (NextOne (NextOne Zero))
                                  ( false ::  false ::  true :: !00! )) .
-Eval compute in (bottom_of_listPolyParam_Zero binary (Empty binary)) .
+Compute (bottom_of_listPolyParam_Zero binary (Empty binary)) .
 
 End PolymorphismParametrizedInductiveImplicitNotations .
 
@@ -395,7 +718,7 @@ Print infiniteNumbers .
 归纳的 无限数字 : 类型 :=
   零 : 无限数字
 | 下一个 : 无限数字 -> 无限数字 .
-(** Guīnà yì wúxiàn shùzì: Lèixíng:=
+(** Guīnà de wúxiàn shùzì: Lèixíng:=
   Líng: Wúxiàn shùzì
 | xià yīgè: Wúxiàn shùzì -> wúxiàn shùzì. *)
 
@@ -422,14 +745,14 @@ Print infiniteNumbers .
 打印 加更多 .
 (** Dǎyìn jiā gèng duō. *)
 
-论点 论点1 : 对全部 ( p外内 : 无限数字 ) ,
+论点 论点1 : 用 ( p外内 : 无限数字 ) ,
     加更多 (下一个 零) p外内 = 加更多 p外内 (下一个 零) .
 (** Lùndiǎn lùndiǎn 1: Duì quánbù (p wài nèi: Wúxiàn shùzì),
     jiā gèng duō (xià yīgè líng) p wài nèi = jiā gèng duō p wài nèi (xià yīgè líng). *)
 证明 .
 (** Zhèngmíng. *)
-  介绍 p外内 .
-  (** Jièshào p wài nèi. *)
+  介绍们 p外内 .
+  (** Jièshàomen p wài nèi. *)
   简化 .
   (** Jiǎnhuà. *)
   消除 p外内 .
@@ -442,10 +765,10 @@ Print infiniteNumbers .
     (** Tóngyī. *)
   - (** p外内 是 ( 下一个 q外内 ) *)
     (** P wài nèi shì (xià yīgè q wài nèi) *)
-    介绍 q外内 .
-    (** jièshào q wài nèi. *)
-    介绍 论点1_q外内 .
-    (** Jièshào lùndiǎn 1_q wài nèi. *)
+    介绍们 q外内 .
+    (** jièshàomen q wài nèi. *)
+    介绍们 论点1_q外内 .
+    (** Jièshàomen lùndiǎn 1_q wài nèi. *)
     简化 .
     (** Jiǎnhuà. *)
     改写 论点1_q外内 .

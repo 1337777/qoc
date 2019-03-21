@@ -1,13 +1,3 @@
-(************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
-(*  v      *   INRIA, CNRS and contributors - Copyright 1999-2018       *)
-(* <O___,, *       (see CREDITS file for the list of authors)           *)
-(*   \VV/  **************************************************************)
-(*    //   *    This file is distributed under the terms of the         *)
-(*         *     GNU Lesser General Public License Version 2.1          *)
-(*         *     (see LICENSE file for the text of the license)         *)
-(************************************************************************)
-
 DECLARE PLUGIN "jisuanji_plugin"
 
 {
@@ -40,7 +30,7 @@ open Pcoq
 
 let all_with delta = Redops.make_red_flag [FBeta;FMatch;FFix;FCofix;FZeta;delta]
 
-let tactic_kw = [ "->"; "<-" ; "by" ]
+let tactic_kw = [ "构" ; "近" ; "->"; "<-" ; "by" ]
 let _ = List.iter CLexer.add_keyword tactic_kw
 
 let err () = raise Stream.Failure
@@ -120,7 +110,7 @@ let lookup_at_as_comma =
   Pcoq.Entry.of_parser "lookup_at_as_comma"
     (fun strm ->
       match stream_nth 0 strm with
-	| KEYWORD (","|"at"|"as") -> ()
+	| KEYWORD (","|"at"|"as"|"如") -> ()
 	| _ -> err ())
 
 open Constr
@@ -391,6 +381,7 @@ GRAMMAR EXTEND Gram
       | IDENT "cbn"; s = strategy_flag -> { Cbn s }
       | IDENT "lazy"; s = strategy_flag -> { Lazy s }
       | IDENT "compute"; delta = delta_flag -> { Cbv (all_with delta) }
+      | IDENT "计算" (* "计算" "jisuan" ; OLD : "compute" *) ; delta = delta_flag -> { Cbv (all_with delta) }      
       | IDENT "vm_compute"; po = OPT ref_or_pattern_occ -> { CbvVm po }
       | IDENT "native_compute"; po = OPT ref_or_pattern_occ -> { CbvNative po }
       | IDENT "unfold" ; ul = LIST1 unfold_occ SEP "," -> { Unfold ul }
@@ -428,16 +419,20 @@ GRAMMAR EXTEND Gram
   ;
   clause_dft_concl:
     [ [ "in"; cl = in_clause -> { cl }
+      | "在" (* "在" "zai" ; OLD : "in" *) ; cl = in_clause -> { cl }
       | occs=occs -> { {onhyps=Some[]; concl_occs=occs} }
       | -> { all_concl_occs_clause } ] ]
   ;
   clause_dft_all:
     [ [ "in"; cl = in_clause -> { cl }
+      | "在" (* "在" "zai" ; OLD : "in" *) ; cl = in_clause -> { cl }
       | -> { {onhyps=None; concl_occs=AllOccurrences} } ] ]
   ;
   opt_clause:
     [ [ "in"; cl = in_clause -> { Some cl }
+      | "在" (* "在" "zai" ; OLD : "in" *) ; cl = in_clause -> { Some cl }
       | "at"; occs = occs_nums -> { Some {onhyps=Some[]; concl_occs=occs} }
+      | "近" (* "近" "jin" ; OLD : "at" *) ; occs = occs_nums -> { Some {onhyps=Some[]; concl_occs=occs} }
       | -> { None } ] ]
   ;
   concl_occ:
@@ -446,10 +441,12 @@ GRAMMAR EXTEND Gram
   ;
   in_hyp_list:
     [ [ "in"; idl = LIST1 id_or_meta -> { idl }
+      | "在" (* "在" "zai" ; OLD : "in" *) ; idl = LIST1 id_or_meta -> { idl }
       | -> { [] } ] ]
   ;
   in_hyp_as:
     [ [ "in"; id = id_or_meta; ipat = as_ipat -> { Some (id,ipat) }
+      | "在" (* "在" "zai" ; OLD : "in" *) ; id = id_or_meta; ipat = as_ipat -> { Some (id,ipat) }
       | -> { None } ] ]
   ;
   orient:
@@ -469,6 +466,7 @@ GRAMMAR EXTEND Gram
   ;
   fixannot:
     [ [ "{"; IDENT "struct"; id=name; "}" -> { Some id }
+      | "{"; IDENT "构" (* "构" "gou" ; OLD : "struct" *) ; id=name; "}" -> { Some id }
       | -> { None } ] ]
   ;
   cofixdecl:
@@ -484,6 +482,7 @@ GRAMMAR EXTEND Gram
   ;
   as_ipat:
     [ [ "as"; ipat = simple_intropattern -> { Some ipat }
+      | "如" (* "如" "ruo" ; OLD : "as" *) ; ipat = simple_intropattern -> { Some ipat }
       | -> { None } ] ]
   ;
   or_and_intropattern_loc:
@@ -492,6 +491,7 @@ GRAMMAR EXTEND Gram
   ;
   as_or_and_ipat:
     [ [ "as"; ipat = or_and_intropattern_loc -> { Some ipat }
+      | "如" (* "如" "ruo" ; OLD : "as" *) ; ipat = or_and_intropattern_loc -> { Some ipat }
       | -> { None } ] ]
   ;
   eqn_ipat:
@@ -503,7 +503,8 @@ GRAMMAR EXTEND Gram
       | -> { None } ] ]
   ;
   as_name:
-    [ [ "as"; id = ident -> { Names.Name.Name id } | -> { Names.Name.Anonymous } ] ]
+    [ [ "as"; id = ident -> { Names.Name.Name id } | -> { Names.Name.Anonymous }
+    | "如" (* "如" "ruo" ; OLD : "as" *) ; id = ident -> { Names.Name.Name id } | -> { Names.Name.Anonymous }  ] ]
   ;
   by_tactic:
     [ [ "by"; tac = tactic_expr LEVEL "3" -> { Some tac }
@@ -539,11 +540,11 @@ GRAMMAR EXTEND Gram
       (* Basic tactics *)
         IDENT "intros"; pl = ne_intropatterns ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (false,pl)) }
-      | IDENT "介绍" (* "介绍" "jieshao" ; OLD:"intros" *) ; pl = ne_intropatterns ->
+      | IDENT "介绍们" (* "介绍们" "jieshaomen" ; OLD: "intros" *)  ; pl = ne_intropatterns ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (false,pl)) }
       | IDENT "intros" ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (false,[CAst.make ~loc @@IntroForthcoming false])) }
-      | IDENT "介绍" (* "介绍" "jieshao" ; OLD:"intros" *) ->
+      | IDENT "介绍们" (* "介绍们" "jieshaomen" ; OLD: "intros" *)  ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (false,[CAst.make ~loc @@IntroForthcoming false])) }
       | IDENT "eintros"; pl = ne_intropatterns ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (true,pl)) }
@@ -552,7 +553,11 @@ GRAMMAR EXTEND Gram
 
       | IDENT "apply"; cl = LIST1 constr_with_bindings_arg SEP ",";
           inhyp = in_hyp_as -> { TacAtom (CAst.make ~loc @@ TacApply (true,false,cl,inhyp)) }
+      | IDENT "应用" (* "应用" "yingyong" ; OLD : "apply" *) ; cl = LIST1 constr_with_bindings_arg SEP ",";
+          inhyp = in_hyp_as -> { TacAtom (CAst.make ~loc @@ TacApply (true,false,cl,inhyp)) }
       | IDENT "eapply"; cl = LIST1 constr_with_bindings_arg SEP ",";
+          inhyp = in_hyp_as -> { TacAtom (CAst.make ~loc @@ TacApply (true,true,cl,inhyp)) }
+      | IDENT "外应用" (* "外应用" "wai yingyong" ; OLD : "eapply" *) ; cl = LIST1 constr_with_bindings_arg SEP ",";
           inhyp = in_hyp_as -> { TacAtom (CAst.make ~loc @@ TacApply (true,true,cl,inhyp)) }
       | IDENT "simple"; IDENT "apply";
           cl = LIST1 constr_with_bindings_arg SEP ",";
@@ -569,7 +574,10 @@ GRAMMAR EXTEND Gram
       | IDENT "例子" (* "例子" "lizi" ; "事例" "shili" ; OLD: "case" *);
           icl = induction_clause_list -> { TacAtom (CAst.make ~loc @@ mkTacCase false icl) }
       | IDENT "ecase"; icl = induction_clause_list -> { TacAtom (CAst.make ~loc @@ mkTacCase true icl) }
+      | IDENT "外例子" (* "外例子" "wai lizi" ; "外事例" "wai shili" ; OLD: "ecase" *) ; icl = induction_clause_list -> { TacAtom (CAst.make ~loc @@ mkTacCase true icl) }
       | "fix"; id = ident; n = natural; "with"; fd = LIST1 fixdecl ->
+	  { TacAtom (CAst.make ~loc @@ TacMutualFix (id,n,List.map mk_fix_tac fd)) }
+      | "固定" (* "固定" "guding" ; OLD : "fix" *) ; id = ident; n = natural; "跟" (* "跟" "gen" ; OLD : "with" *) ; fd = LIST1 fixdecl ->
 	  { TacAtom (CAst.make ~loc @@ TacMutualFix (id,n,List.map mk_fix_tac fd)) }
       | "cofix"; id = ident; "with"; fd = LIST1 cofixdecl ->
 	  { TacAtom (CAst.make ~loc @@ TacMutualCofix (id,List.map mk_cofix_tac fd)) }
@@ -657,7 +665,11 @@ GRAMMAR EXTEND Gram
 	  { TacAtom (CAst.make ~loc @@ TacInductionDestruct(true,true,ic)) }
       | IDENT "destruct"; icl = induction_clause_list ->
 	  { TacAtom (CAst.make ~loc @@ TacInductionDestruct(false,false,icl)) }
+      | IDENT "解构" (* "解构" "jiegou" ; OLD : "destruct" *) ; icl = induction_clause_list ->
+	  { TacAtom (CAst.make ~loc @@ TacInductionDestruct(false,false,icl)) }
       | IDENT "edestruct";  icl = induction_clause_list ->
+	  { TacAtom (CAst.make ~loc @@ TacInductionDestruct(false,true,icl)) }
+      | IDENT "外解构" (* "外解构" "wai jiegou" ; OLD : "edestruct" *) ;  icl = induction_clause_list ->
 	  { TacAtom (CAst.make ~loc @@ TacInductionDestruct(false,true,icl)) }
 
       (* Equality and inversion *)

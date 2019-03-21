@@ -76,7 +76,10 @@ GRAMMAR EXTEND Gram
       | IDENT "Save"; id = identref ->
 	  { VernacEndProof (Proved (Opaque, Some id)) }
       | IDENT "Defined" -> { VernacEndProof (Proved (Transparent,None)) }
+      | IDENT "定义了" (* "定义了" "dingyile" ; OLD : "Defined" *) -> { VernacEndProof (Proved (Transparent,None)) }
       |	IDENT "Defined"; id=identref ->
+	  { VernacEndProof (Proved (Transparent,Some id)) }
+      |	IDENT "定义了" (* "定义了" "dingyile" ; OLD : "Defined" *) ; id=identref ->
 	  { VernacEndProof (Proved (Transparent,Some id)) }
       | IDENT "Restart" -> { VernacRestart }
       | IDENT "Undo" -> { VernacUndo 1 }

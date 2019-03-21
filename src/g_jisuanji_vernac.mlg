@@ -208,6 +208,8 @@ GRAMMAR EXTEND Gram
           { VernacDefinition (d, name_of_ident_decl id, b) }
       | IDENT "Let"; id = identref; b = def_body ->
           { VernacDefinition ((DoDischarge, Let), (lname_of_lident id, None), b) }
+      | IDENT "让" (* "让" "rang" ; OLD : "Let" *) ; id = identref; b = def_body ->
+          { VernacDefinition ((DoDischarge, Let), (lname_of_lident id, None), b) }
       (* Gallina inductive declarations *)
       | cum = OPT cumulativity_token; priv = private_token; f = finite_token;
         indl = LIST1 inductive_definition SEP "with" ->
@@ -373,6 +375,7 @@ GRAMMAR EXTEND Gram
   ;
   reduce:
     [ [ IDENT "Eval"; r = red_expr; "in" -> { Some r }
+      | IDENT "评估" (* "评估" "pinggu" ; OLD : "Eval" *) ; r = red_expr; "in" -> { Some r }
       | -> { None } ] ]
   ;
   one_decl_notation:
@@ -655,7 +658,9 @@ GRAMMAR EXTEND Gram
   with_declaration:
     [ [ "Definition"; fqid = fullyqualid; udecl = OPT univ_decl; ":="; c = Constr.lconstr ->
           { CWith_Definition (fqid,udecl,c) }
-      | IDENT "Module"; fqid = fullyqualid; ":="; qid = qualid ->
+       | "定义" (* "定义" "dingyi" ; OLD: "Definition" *) ; fqid = fullyqualid; udecl = OPT univ_decl; ":="; c = Constr.lconstr ->
+          { CWith_Definition (fqid,udecl,c) } 
+       | IDENT "Module"; fqid = fullyqualid; ":="; qid = qualid ->
 	  { CWith_Module (fqid,qid) }
       ] ]
   ;
@@ -760,6 +765,28 @@ GRAMMAR EXTEND Gram
 
       (* Arguments *)
       | IDENT "Arguments"; qid = smart_global; 
+        args = LIST0 argument_spec_block;
+        more_implicits = OPT
+          [ ","; impl = LIST1
+            [ impl = LIST0 more_implicits_block -> { List.flatten impl } ]
+            SEP "," -> { impl }
+          ];
+        mods = OPT [ ":"; l = LIST1 arguments_modifier SEP "," -> { l } ] ->
+         { let mods = match mods with None -> [] | Some l -> List.flatten l in
+         let slash_position = ref None in
+         let rec parse_args i = function
+           | [] -> []
+           | `Id x :: args -> x :: parse_args (i+1) args
+           | `Slash :: args ->
+              if Option.is_empty !slash_position then
+                (slash_position := Some i; parse_args i args)
+              else
+                user_err Pp.(str "The \"/\" modifier can occur only once")
+         in
+         let args = parse_args 0 (List.flatten args) in
+         let more_implicits = Option.default [] more_implicits in
+         VernacArguments (qid, args, more_implicits, !slash_position, mods) }
+      | IDENT "键入" (* "键入" "jianru" ; OLD : "Arguments" *) ; qid = smart_global; 
         args = LIST0 argument_spec_block;
         more_implicits = OPT
           [ ","; impl = LIST1
@@ -968,7 +995,11 @@ GRAMMAR EXTEND Gram
       (* For acting on parameter tables *)
       | "Set"; table = option_table; v = option_value ->
           { VernacSetOption (false, table, v) }
+      | "设置" (* "设置" "shezhi" ; OLD : "Set" *) ; table = option_table; v = option_value ->
+          { VernacSetOption (false, table, v) }
       | IDENT "Unset"; table = option_table ->
+          { VernacUnsetOption (false, table) }
+      | IDENT "未设置" (* "未设置" "weishezhi" ; OLD : "Unset" *) ; table = option_table ->
           { VernacUnsetOption (false, table) }
 
       | IDENT "Print"; IDENT "Table"; table = option_table ->
@@ -996,14 +1027,20 @@ GRAMMAR EXTEND Gram
   query_command: (* TODO: rapprocher Eval et Check *)
     [ [ IDENT "Eval"; r = red_expr; "in"; c = lconstr; "." ->
           { fun g -> VernacCheckMayEval (Some r, g, c) }
+      | IDENT "评估" (* "评估" "pinggu" ; OLD : "Eval" *) ; r = red_expr; "在" (* "在" "zai" ; OLD : "in" *) ; c = lconstr; "." ->
+          { fun g -> VernacCheckMayEval (Some r, g, c) }
       | IDENT "Compute"; c = lconstr; "." ->
+	  { fun g -> VernacCheckMayEval (Some (Genredexpr.CbvVm None), g, c) }
+      | IDENT "计算" (* "计算" "jisuan" ; OLD : "Compute" *) ; c = lconstr; "." ->
 	  { fun g -> VernacCheckMayEval (Some (Genredexpr.CbvVm None), g, c) }
       | IDENT "Check"; c = lconstr; "." ->
 	 { fun g -> VernacCheckMayEval (None, g, c) }
-      | IDENT "校验" ; c = lconstr; "." ->
+      | IDENT "校验" (* "校验" "jiaoyan" ; OLD: "Check" *) ; c = lconstr; "." ->
 	 { fun g -> VernacCheckMayEval (None, g, c) }
       (* Searching the environment *)
       | IDENT "About"; qid = smart_global; l = OPT univ_name_list; "." ->
+         { fun g -> VernacPrint (PrintAbout (qid,l,g)) }
+      | IDENT "关于" (* "关于" "guanyu" ; OLD : "About" *) ; qid = smart_global; l = OPT univ_name_list; "." ->
          { fun g -> VernacPrint (PrintAbout (qid,l,g)) }
       | IDENT "SearchHead"; c = constr_pattern; l = in_or_out_modules; "." ->
 	  { fun g -> VernacSearch (SearchHead c,g, l) }
@@ -1204,7 +1241,16 @@ GRAMMAR EXTEND Gram
 	 idl = LIST0 ident; ":="; c = constr; b = only_parsing ->
            { VernacSyntacticDefinition
              (id,(idl,c),b) }
+     | IDENT "符号" (* "符号" "fuhao" ; OLD: "Notation" *) ; id = identref;
+	 idl = LIST0 ident; ":="; c = constr; b = only_parsing ->
+           { VernacSyntacticDefinition
+             (id,(idl,c),b) }
      | IDENT "Notation"; s = lstring; ":=";
+	 c = constr;
+         modl = [ "("; l = LIST1 syntax_modifier SEP ","; ")" -> { l } | -> { [] } ];
+	 sc = OPT [ ":"; sc = IDENT -> { sc } ] ->
+           { VernacNotation (c,(s,modl),sc) }
+     | IDENT "符号" (* "符号" "fuhao" ; OLD: "Notation" *) ; s = lstring; ":=";
 	 c = constr;
          modl = [ "("; l = LIST1 syntax_modifier SEP ","; ")" -> { l } | -> { [] } ];
 	 sc = OPT [ ":"; sc = IDENT -> { sc } ] ->

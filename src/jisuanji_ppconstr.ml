@@ -399,7 +399,7 @@ let tag_var = tag Tag.variable
               | CLocalPattern _ -> assert false
             in let ids = List.flatten (List.map names_of_binder bl) in
                if List.length ids > 1 then
-                 spc() ++ str "{" ++ keyword "struct" ++ spc () ++ pr_id id ++ str"}"
+                 spc() ++ str "{" ++ keyword "构" (* "构" "gou" ; OLD : "struct" *) ++ spc () ++ pr_id id ++ str"}"
                else mt()
           | CWfRec c ->
             spc() ++ str "{" ++ keyword "wf" ++ spc () ++ pr_aux c ++ spc() ++ pr_id id ++ str"}"
@@ -418,13 +418,13 @@ let tag_var = tag Tag.variable
     | [] -> anomaly (Pp.str "(co)fixpoint with no definition.")
     | [d1] -> pr_decl false d1
     | dl ->
-      prlist_with_sep (fun () -> fnl() ++ keyword "with" ++ spc ())
+      prlist_with_sep (fun () -> fnl() ++ keyword "跟" (* "跟" "gen" ; OLD : "with" *) ++ spc ())
         (pr_decl true) dl ++
         fnl() ++ keyword "for" ++ spc () ++ pr_id id
 
   let pr_asin pr na indnalopt =
     (match na with (* Decision of printing "_" or not moved to constrextern.ml *)
-      | Some na -> spc () ++ keyword "as" ++ spc () ++  pr_lname na
+      | Some na -> spc () ++ keyword "如" (* "如" "ruo" ; OLD : "as" *) ++ spc () ++  pr_lname na
       | None -> mt ()) ++
       (match indnalopt with
         | None -> mt ()
@@ -442,7 +442,7 @@ let tag_var = tag Tag.variable
   let pr_simple_return_type pr na po =
     (match na with
       | Some {v=Name id} ->
-        spc () ++ keyword "as" ++ spc () ++ pr_id id
+        spc () ++ keyword "如" (* "如" "ruo" ; OLD : "as" *) ++ spc () ++ pr_id id
       | _ -> mt ()) ++
       pr_case_type pr po
 
@@ -465,9 +465,9 @@ let tag_var = tag Tag.variable
     prlist_with_sep pr_semicolon
       (fun (id, c) -> h 1 (pr_reference id ++ spc () ++ str":=" ++ pr ltop c)) l
 
-  let pr_forall n = keyword "对全部" (* "对全部" "duiyu suoyou" OLD: "forall" *) ++ pr_com_at n ++ spc ()
+  let pr_forall n = keyword "用" (* "用" "yong" ; "对全部" "duiyu suoyou" OLD: "forall" *) ++ pr_com_at n ++ spc ()
 
-  let pr_fun n = keyword "fun" ++ pr_com_at n ++ spc ()
+  let pr_fun n = keyword "作用" (* "作用" "zuoyong" ; OLD : "fun" *) ++ pr_com_at n ++ spc ()
 
   let pr_fun_sep = spc () ++ str "=>"
 
@@ -485,7 +485,7 @@ let tag_var = tag Tag.variable
         return (pr_cref r us, latom)
       | CFix (id,fix) ->
         return (
-          hov 0 (keyword "fix" ++ spc () ++
+          hov 0 (keyword "固定" (* "固定" "guding" ; OLD : "fix" *) ++ spc () ++
                    pr_recursive
                    (pr_fixdecl (pr mt) (pr_dangling_with_for mt pr)) id.v fix),
           lfix

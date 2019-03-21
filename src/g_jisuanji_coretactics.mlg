@@ -38,11 +38,13 @@ DECLARE PLUGIN "jisuanji_plugin"
 (** Basic tactics *)
 
 TACTIC EXTEND reflexivity
-| [ "同一" (* "同一" tongyi ; "反射" fanshe ; "reflexivity" *) ] -> { Tactics.intros_reflexivity }
+| [ "reflexivity" ] -> { Tactics.intros_reflexivity }
+| [ "同一" (* "同一" tongyi ; "反射" fanshe ; OLD : "reflexivity" *) ] -> { Tactics.intros_reflexivity }
 END
 
 TACTIC EXTEND exact
 | [ "exact" casted_constr(c) ] -> { Tactics.exact_no_check c }
+| [ "确切" (* "确切" "queqie" ; OLD : "exact" *) casted_constr(c) ] -> { Tactics.exact_no_check c }
 END
 
 TACTIC EXTEND assumption
@@ -318,7 +320,12 @@ TACTIC EXTEND clear
     if List.is_empty ids then Tactics.keep []
     else Tactics.clear ids
   }
+| [ "清除" (* "清除" "qingchu" ; OLD : "clear" *) hyp_list(ids) ] -> {
+    if List.is_empty ids then Tactics.keep []
+    else Tactics.clear ids
+  }
 | [ "clear" "-" ne_hyp_list(ids) ] -> { Tactics.keep ids }
+| [ "清除" (* "清除" "qingchu" ; OLD : "clear" *) "-" ne_hyp_list(ids) ] -> { Tactics.keep ids }
 END
 
 (* Clearbody *)
@@ -351,7 +358,7 @@ let initial_atomic () =
         "simpl", TacReduce(Simpl (Redops.all_flags,None),nocl);
         "compute", TacReduce(Cbv Redops.all_flags,nocl);
         "intros", TacIntroPattern (false,[]);
-	"介绍" (* "介绍" "jieshao" ; OLD: "intros" *) , TacIntroPattern (false,[]);
+	"介绍们" (* "介绍们" "jieshaomen" ; OLD: "intros" *) , TacIntroPattern (false,[]);
       ]
   in
   let iter (s, t) = Tacenv.register_ltac false false (Names.Id.of_string s) t in

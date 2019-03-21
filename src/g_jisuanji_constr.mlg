@@ -33,8 +33,8 @@ open Pcoq.Constr
 let ldots_var = Id.of_string ".."
 
 let constr_kw =
-  [  "对全部" ; "forall"; "fun"; "match"; "匹配" ; "fix"; "cofix"; "with"; "与" ; "in"; "for";
-    "end"; "结束" ; "as"; "如" ; "let"; "if"; "若" ; "then"; "则" ; "else"; "否则" ; "return"; "返回" ;
+  [ "构" ; "近" ; "forall"; "用" ; "fun"; "作用" ; "match"; "匹配" ; "fix"; "固定" ; "cofix"; "with"; "与" ; "in"; "在"; "for";
+    "end"; "结束" ; "as"; "如" ; "let"; "让"; "if"; "若" ; "then"; "则" ; "else"; "否则" ; "return"; "返回" ;
     "Prop"; "Set";  "Type"; "类型" ; ".("; "_"; "..";
     "`{"; "`("; "{|"; "|}" ]
 
@@ -105,7 +105,7 @@ let impl_ident_head =
       match stream_nth 0 strm with
 	| KEYWORD "{" ->
 	    (match stream_nth 1 strm with
-	      | IDENT ("wf"|"struct"|"measure") -> err ()
+	      | IDENT ("wf"|"struct"|"构"|"measure") -> err ()
 	      | IDENT s ->
 		  stream_njunk 2 strm;
 		  Names.Id.of_string s
@@ -265,12 +265,23 @@ GRAMMAR EXTEND Gram
       { (id, mkLambdaCN ~loc bl c) } ] ]
   ;
   binder_constr:
-    [ [ "对全部" (* "对全部" "duiyu suoyou" OLD: "forall" *) ; bl = open_binders; ","; c = operconstr LEVEL "200" ->
+    [ [ "forall" ; bl = open_binders; ","; c = operconstr LEVEL "200" ->
+          { mkProdCN ~loc bl c }
+      |  "用" (* "用" "yong" ; "对全部" "duiyu suoyou" OLD: "forall" *) ; bl = open_binders; ","; c = operconstr LEVEL "200" ->
           { mkProdCN ~loc bl c }
       | "fun"; bl = open_binders; "=>"; c = operconstr LEVEL "200" ->
           { mkLambdaCN ~loc bl c }
+      | "作用" (* "作用" "zuoyong" ; OLD : "fun" *) ; bl = open_binders; "=>"; c = operconstr LEVEL "200" ->
+          { mkLambdaCN ~loc bl c }
       | "let"; id=name; bl = binders; ty = type_cstr; ":=";
         c1 = operconstr LEVEL "200"; "in"; c2 = operconstr LEVEL "200" ->
+        { let ty,c1 = match ty, c1 with
+          | (_,None), { CAst.v = CCast(c, CastConv t) } -> (Loc.tag ?loc:(constr_loc t) @@ Some t), c (* Tolerance, see G_vernac.def_body *)
+          | _, _ -> ty, c1 in
+          CAst.make ~loc @@ CLetIn(id,mkLambdaCN ?loc:(constr_loc c1) bl c1,
+                 Option.map (mkProdCN ?loc:(fst ty) bl) (snd ty), c2) }
+      | "让" (* "让" "rang" ; OLD : "let" *) ; id=name; bl = binders; ty = type_cstr; ":=";
+        c1 = operconstr LEVEL "200"; "在" (* "在" "zai" ; OLD : "in" *) ; c2 = operconstr LEVEL "200" ->
         { let ty,c1 = match ty, c1 with
           | (_,None), { CAst.v = CCast(c, CastConv t) } -> (Loc.tag ?loc:(constr_loc t) @@ Some t), c (* Tolerance, see G_vernac.def_body *)
           | _, _ -> ty, c1 in
@@ -458,6 +469,7 @@ GRAMMAR EXTEND Gram
   ;
   fixannot:
     [ [ "{"; IDENT "struct"; id=identref; "}" -> { (Some id, CStructRec) }
+    | "{"; IDENT "构" (* "构" "gou" ; OLD : "struct" *) ; id=identref; "}" -> { (Some id, CStructRec) }
     | "{"; IDENT "wf"; rel=constr; id=OPT identref; "}" -> { (id, CWfRec rel) }
     | "{"; IDENT "measure"; m=constr; id=OPT identref;
 	rel=OPT constr; "}" -> { (id, CMeasureRec (m,rel)) }
