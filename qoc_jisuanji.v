@@ -1,5 +1,27 @@
 From Qoc Require Import Jisuanji .
   
+(*
+
+（1.）有限二进制值为：真;假。
+
+（2.）无限数是：0; 1; 2 =下一个1; 3 =接下来2; 4 =接下来3; ....
+但这些数字无法携带额外的数据。 我将为数据定义一些新的容器结构，命名为“序列”或“列表”。
+
+（3.）序列可以携带数据。例如，该序列的数据可以是动物：[]; [ 猫 ] ; [ 狗，猫 ] ; [鱼，狗，猫] ......
+另一个例子，这个序列的数据可能是颜色：[]; [红]; [ 蓝，红 ] ; [金，蓝，红] ......
+
+（4.）这个序列可能包含多种形式数据的想法被称为多态。
+
+（5.）也符号允许隐藏这种多态性。那个我写的东西如（加入一个 动物 鱼（加入一个 动物 狗（加入一个 动物 猫（空的 动物））））; 然后我写了诸如[鱼，狗，猫]之类的东西，我隐藏了数据类型“动物”。
+
+（6.）最后，我还可以为所有不同的数据类型编程一些多态性函数“底部”。我只编程一个，但我可以写一些东西，如（底部[鱼，狗，猫]）=猫; 我也可以写一些东西，如（底部[金，蓝，红]）=红。
+
+（7.）我还将展示如何编写多态性函数“顶端”和“剩下”，这样（顶端 [鱼，狗，猫]）= 鱼，和（剩下 [鱼，狗，猫]）= [狗，猫 ] 。
+
+（8.）除了多态 - 对象之外，参数值/箭头也可以是推断/隐式/符号。 这将在下一个实时转录中呈现 。
+
+*)
+
 包裹 多态_归纳的_隐含_符号 .
 
 归纳的 序列'多态 (数据 : 类型) : 类型 := 
@@ -46,7 +68,7 @@ From Qoc Require Import Jisuanji .
 计算 (剩下_对于_序列'多态 _ ( (下一个 (下一个 零)) :: 零 :: (下一个 零) :: !00! ) ) .
 符号 "'剩下'" := ( 剩下_对于_序列'多态 _ ) .
 计算 (剩下 ( 假 ::  假 ::  真 :: !00! ) ) .
-(**MEMO: 多态-objects can be inferred-implicit , via [键入] command *)
+(**MEMO: 多态-对象可以通过[键入]命令推断 *)
 键入 剩下_对于_序列'多态 [数据] l .
 计算 (剩下_对于_序列'多态 ( 假 ::  假 ::  真 :: !00! ) ) .
 
@@ -55,8 +77,7 @@ From Qoc Require Import Jisuanji .
 
   变量 数据 : 类型 .
 
-  (** the precise form/type of the output 
-      ( precisely [单位] or [数据] ? ) depends on the input *)
+  (** 输出的精确形式/类型（精确地[单位]或[数据]？）取决于输入 *)
   归纳的 选项'多态 : 类型 := 
     键入_无效 : (* 单位 -> *) 选项'多态
   | 键入_效 : 数据 -> 选项'多态 .
@@ -67,9 +88,8 @@ From Qoc Require Import Jisuanji .
 
 设置 隐含 键入 .
 
-(** in some sense , the precise form/type of the output 
-    ( precisely [单位] or [数据] ? ) depends on the (parameter of the) input
-    ( whether [l] is invalid or valid ? ) *)
+(** 在某种意义上，输出的精确形式/类型（精确地[单位]或[数据]？）
+    取决于输入的（参数）（[l]是无效还是有效？） *)
 定义 顶部_对于_序列'多态 : 用 (数据 : 类型) (l : 序列'多态 数据), 选项'多态 数据.
 证明 .
   介绍们 数据 l . 例子 l .
@@ -104,11 +124,10 @@ From Qoc Require Import Jisuanji .
 
 
 包裹 多态'参数化了'归纳的隐含符号s .
-(** memo that in some instances such as [顶部_对于_序列'多态] above , 
-    then the parameters of the inputs is the same as the inputs *)
+(** 备忘录，在某些情况下，例如[顶部_对于_序列'多态]， 然后输入的参数与输入相同 *)
 
-(** the parameters [无限数字] is computational , 
-    its elements can be matched/decided along forms/constructors *)
+(** 参数[无限数字]是计算的，
+    它的元素可以沿着表单/构造函数进行匹配/决定 *)
 归纳的 无限数字 : 类型 :=
   零 : 无限数字
 | 下一个 : 无限数字 -> 无限数字 .
@@ -119,27 +138,24 @@ From Qoc Require Import Jisuanji .
   变量 公式_零 : 用 (l : input参数 零), 类型 .
   变量 公式_下一个 : 用 (q : 无限数字) (l : input参数 (下一个 q)), 类型 .
 
-  (** the precise form of the output
-        ( precisely [公式_零 l] or [公式_下一个 q l] ? ) 
-        depends on the parameter of the input 
-        ( whether [p] is 零 or [下一个 q] ? ) *)
+  (** 输出的精确形式（恰好是[公式_零l]或[公式_下一个q l]？）
+      取决于输入的参数（[p]是零还是[下一个q]？） *)
   归纳的 选项们'多态'参数 : 用 (p : 无限数字) (l : input参数 p), 类型 :=
     参数_零 : 用 (l : input参数 零),
       公式_零 l -> 选项们'多态'参数 零 l
   | 参数_下一个 : 用 (q : 无限数字) (l : input参数 (下一个 q)),
       公式_下一个 q l -> 选项们'多态'参数 (下一个 q) l .
 
-  (** this is possible because the parameters [无限数字] is computational , 
-        its elements can be matched/decided along forms/constructors *)
+  (** 这是可能的，因为参数[无限数字]是计算的，其元素可以沿着表单/构造函数进行匹配/决定 *)
   定义 structured选项们'多态'参数 :
     用 (p : 无限数字) (l : input参数 p), 类型 .
   证明 .
-    介绍们 p . 例子 p (** because [无限数字] is computational *) .
+    介绍们 p . 例子 p (** 因为[无限数字]是计算的 *) .
     - 确切 公式_零.
     - 确切 公式_下一个 .
   定义了 .
 
-  (** this is the inversion lemma for [选项们'多态'参数] *)
+  (** 这是[选项们'多态'参数]的反转引理 *)
   定义 structured选项们'多态'参数_对于_选项们'多态'参数 :
     用 (p : 无限数字) (l : input参数 p) (f : 选项们'多态'参数 p l),
       structured选项们'多态'参数 p l .
@@ -151,14 +167,14 @@ From Qoc Require Import Jisuanji .
             结束) .
   定义了 .
 
-  (** this is the instance of the inversion lemma of [选项们'多态'参数] for the parameter [零] *)
+  (** 这是参数[零]的[选项们'多态'参数]的反转引理的实例 *)
   定义 公式_零_对于_选项们'多态'参数__零 :
     用 (l : input参数 零) (f : 选项们'多态'参数 零 l), 公式_零 l .
   证明 .
     介绍们 l . 确切 (structured选项们'多态'参数_对于_选项们'多态'参数 零 l) .
   定义了 .
 
-  (** this is the instance of the inversion lemma of [选项们'多态'参数] for the parameter [下一个 _] *)
+  (** 这是参数[下一个_]的[选项们'多态'参数]的反转引理的实例 *)
   定义 公式_下一个_对于_选项们'多态'参数__下一个 :
     用 (q : 无限数字) (l : input参数 (下一个 q)) (f : 选项们'多态'参数 (下一个 q) l),
       公式_下一个 q l 
@@ -170,7 +186,6 @@ From Qoc Require Import Jisuanji .
 
   变量 数据 : 类型 .
 
-  (**MEMO: this could be presented/accessed through some interface for abstract 数据 types *)
   归纳的 序列'多态'参数 : 无限数字 -> 类型 := 
     空的 : 序列'多态'参数 零
   | 加入一个 : 用 (d : 数据) (q : 无限数字) (l : 序列'多态'参数 q), 序列'多态'参数 (下一个 q) .
@@ -183,10 +198,8 @@ From Qoc Require Import Jisuanji .
     让 公式_下一个 : 用 (q : 无限数字) (l : 序列'多态'参数 (下一个 q)), 类型
       := ( 作用 (q : 无限数字) ( _ : 序列'多态'参数 (下一个 q) ) => 序列'多态'参数 q ) .
 
-    (** the precise form of the output
-      ( precisely [公式_零 l] or [公式_下一个 q l] ? ) 
-      depends on the parameter of the input 
-      ( whether [p] is 零 or [下一个 q] ? ) *)
+    (** 输出的精确形式（恰好是[公式_零l]或[公式_下一个q l]？
+        ）取决于输入的参数（[p]是零还是[下一个q]？） *)
     定义 剩下_对于_序列'多态'参数 : 用 (p : 无限数字) (l : 序列'多态'参数 p),
         选项们'多态'参数 序列'多态'参数 公式_零 公式_下一个 p l .
     证明 .
@@ -303,7 +316,7 @@ From Qoc Require Import Jisuanji .
 计算 (加入一个 二进制 真 零 (空的 二进制)) .
 计算 (加入一个 _ 真 零 (空的 _)) .
 计算 (加入一个 _ 真 _ (空的 _)) .
-(**MEMO: parameters can also be inferred-implicit , in addition to 多态-objects , via [符号] command *)
+(**MEMO: 除了多态-对象之外，还可以通过[符号]命令推断出参数 *)
 符号 "d :: l" := (加入一个 _ d _ l) .
 符号 "!00!" := (空的 _) .
 计算 ( 真 :: !00! ).
@@ -312,7 +325,7 @@ From Qoc Require Import Jisuanji .
 计算 (剩下_对于_序列'多态'参数_下一个 _ _ ( 假 ::  假 ::  真 :: !00! ) ) .
 符号 "'剩下'" := ( 剩下_对于_序列'多态'参数_下一个 _ _ ) .
 计算 (剩下 ( 假 ::  假 ::  真 :: !00! ) ) .
-(**MEMO: parameters can also be inferred-implicit , in addition to 多态-objects  , via [键入] command *)
+(**MEMO: 除了多态-对象之外，还可以通过[键入]命令推断出参数 *)
 键入 剩下_对于_序列'多态'参数_下一个 [数据] [q] l .
 计算 (剩下_对于_序列'多态'参数_下一个 ( 假 ::  假 ::  真 :: !00! ) ) .
 
@@ -328,16 +341,29 @@ From Qoc Require Import Jisuanji .
 
 
 
-(** -trans------------------------------------------------------------------------ *)
+(** ------------------------------------------------------------------------- *)
+
+
 
 (*
-The finite binary values are : true ; false .
-The infinite numbers are : 1 ; 2 = next 1 ; 3 = next 2 ; 4 = next 3 ; ....
-The numbers cannot carry additional data .
-The sequences can carry data . For example , this data may be animals : [ ] ; [ cat ] ; [ cat , dog ] ; [ cat , dog , fish ] ...
-For example , this data of the sequence may be colors : [ ] ; [ red ] ; [ red , blue ] ; [ red , blue , gold ] ...
-This idea that the sequences may contain data of many forms is named : polymorphism .
 
+(1.) The finite binary values are : true ; false .
+
+(2.) The infinite numbers are : 0 ; 1 ; 2 = next 1 ; 3 = next 2 ; 4 = next 3 ; ....
+But the numbers cannot carry additional data .  I shall define some new container structure for data , which  is named "sequences" or "lists" .
+
+(3.) The sequences can carry data . For example , this data of the sequence may be animals : [ ] ; [ cat ] ; [ dog , cat ] ; [ fish , dog , cat ] ...
+Another example , this data of the sequence may be colors : [ ] ; [ red ] ; [ blue , red ] ; [ gold , blue , red  ] ...
+
+(4.) This idea that the sequences may contain data of many forms is named as polymorphism .
+
+(5.) The notations allow to hide this polymorphisms . So that instad that I write something such as (JoinOne animals fish (JoinOne animals dog (JoinOne animals cat (Empty animals)))) ; then I write something such as [ fish , dog , cat ] , and I have hidden the data type which is "animals" .
+
+(6.) Finally , I may also program some polymorphism function "bottom" only once for all the different data types . I program only one , but I can write something such as ( bottom [ fish , dog , cat ] ) = cat ; and I can also write something such as ( bottom [ gold , blue , red  ] ) = red .
+
+(7.) I will also show how to write the polymorphism functions "top" and "rest" , such that ( top [ fish , dog , cat ] ) = fish , and ( rest [ fish , dog , cat ] ) = [ dog , cat ] .
+
+(8.) In addition to polymorphism-objects , parameters-values/arrows can also be inferred/implicit/notational . This will be presented in the next live transcription .
 *)
 
 Module PolymorphismInductiveImplicitNotations .
@@ -509,7 +535,6 @@ Section section_polymorphism_parametrized .
 
   Variable data : Type .
 
-  (**MEMO: this could be presented/accessed through some interface for abstract data types *)
   Inductive listPolyParam : infiniteNumbers -> Type := 
     Empty : listPolyParam Zero
   | JoinOne : forall (d : data) (q : infiniteNumbers) (l : listPolyParam q), listPolyParam (NextOne q) .
