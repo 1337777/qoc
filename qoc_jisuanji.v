@@ -57,7 +57,7 @@ From Qoc Require Import Jisuanji .
 计算 (加入一个 二进制 真 (空的 二进制)).
 计算 (加入一个 _ 真 (空的 _)).
 计算 (加入一个 _ (下一个 (下一个 零)) (空的 _)).
-(**MEMO: 多态-objects can be inferred-implicit , via [符号] command *)
+(**MEMO: 多态-对象可以通过[符号]命令推断 *)
 符号 "d :: l" := (加入一个 _ d l) .
 符号 "!00!" := (空的 _) .
 计算 ( 真 :: !00! ).
