@@ -4,6 +4,7 @@ G_jisuanji_tactic
 Jisuanji_extratactics
 G_jisuanji_proofs
 G_jisuanji_vernac
+Jisuanji_ssrparser
 G_jisuanji
 Jisuanji_ppconstr
 Jisuanji_printmod

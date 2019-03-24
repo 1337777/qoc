@@ -2,6 +2,11 @@
 -I src
 
 theories/Jisuanji.v
+qoc_jisuanji_logic_variables_proof.v
+qoc_jisuanji_inductive.v
+qoc_jisuanji_polymorphism_notation.v
+qoc_jisuanji_parameter_option.v
+qoc_jisuanji_tactics.v
 qoc_jisuanji.v
 
 src/jisuanji_ppconstr.ml
@@ -13,6 +18,7 @@ src/g_jisuanji_tactic.mlg
 src/jisuanji_extratactics.mlg
 src/g_jisuanji_proofs.mlg
 src/g_jisuanji_vernac.mlg
+src/jisuanji_ssrparser.mlg
 src/g_jisuanji.mlg
 src/jisuanji_vernacentries.ml
 src/jisuanji_plugin.mlpack
