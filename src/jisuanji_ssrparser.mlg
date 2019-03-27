@@ -1557,7 +1557,8 @@ END
 {
 
 let sq_brace_tacnames =
-   ["first"; "solve"; "do"; "rewrite"; "have"; "suffices"; "wlog"]
+   ["first"; "solve"; "do"; "rewrite"; "改写" (* "改写" "gaixie" ; OLD: "rewrite" *); "have"; "suffices"; "wlog";
+   "parametric"; "参" (* "参数" "canshu" ; OLD : "parametric" *) ; "have_relatively" ; "suffices_relatively" (* ; "suffice" *) ; "have_under" ; "suffices_under" ; "具有" (* "具有" "juyou" ; OLD : "have" *) ; "满足" (* "满足" "manzu" ; OLD : "suffices" *) ; "同时" (* "同时" "tongshi" ; OLD : "simultaneous" *) ; "具有_相对" (* "具有_相对" "juyou xiangdui" ; OLD : "have_relatively" *) ; "具有_下" (* "具有_下" "juyou xia" ; OLD : "have_under" *) ; "满足_相对" (* "满足_相对" "manzu xiangdui" ; OLD : "suffices_relatively" *) ; "满足_下" (* "满足_下" "manzu xia" ; OLD : "suffices_under" *) ]
    (* "by" is a keyword *)
 let accept_ssrseqvar strm =
   match stream_nth 0 strm with
@@ -2114,7 +2115,10 @@ END
 TACTIC EXTEND ssrcase
 | [ "case" jisuanji_ssrcasearg(arg) jisuanji_ssrclauses(clauses) ] ->
   { tclCLAUSES (ssrcasetac (movearg_of_parsed_movearg arg)) clauses }
+| [ "例子" (* "例子" "lizi" ; "事例" "shili" ; OLD: "case" *) jisuanji_ssrcasearg(arg) jisuanji_ssrclauses(clauses) ] ->
+  { tclCLAUSES (ssrcasetac (movearg_of_parsed_movearg arg)) clauses }
 | [ "case" ] -> { ssrscasetoptac }
+| [ "例子" (* "例子" "lizi" ; "事例" "shili" ; OLD: "case" *) ] -> { ssrscasetoptac }
 END
 
 (** The "elim" tactic *)
@@ -2122,7 +2126,10 @@ END
 TACTIC EXTEND ssrelim
 | [ "elim" jisuanji_ssrarg(arg) jisuanji_ssrclauses(clauses) ] ->
   { tclCLAUSES (ssrelimtac (movearg_of_parsed_movearg arg)) clauses }
+| [ "消除" (* "消除" "xiaochu" ; OLD" "elim" *) jisuanji_ssrarg(arg) jisuanji_ssrclauses(clauses) ] ->
+  { tclCLAUSES (ssrelimtac (movearg_of_parsed_movearg arg)) clauses }
 | [ "elim" ] -> { ssrselimtoptac }
+| [ "消除" (* "消除" "xiaochu" ; OLD" "elim" *) ] -> { ssrselimtoptac }
 END
 
 (** 6. Backward chaining tactics: apply, exact, congr. *)
@@ -2181,7 +2188,11 @@ TACTIC EXTEND ssrapply
 | [ "apply" jisuanji_ssrapplyarg(arg) ] -> {
      let views, (gens_clr, intros) = arg in
      inner_ssrapplytac views gens_clr ist <*> tclIPATssr intros }
+| [ "应用" (* "应用" "yingyong" ; OLD : "apply" *) jisuanji_ssrapplyarg(arg) ] -> {
+     let views, (gens_clr, intros) = arg in
+     inner_ssrapplytac views gens_clr ist <*> tclIPATssr intros }
 | [ "apply" ] -> { apply_top_tac }
+| [ "应用" (* "应用" "yingyong" ; OLD : "apply" *) ] -> { apply_top_tac }
 END
 
 (** The "exact" tactic *)
@@ -2214,9 +2225,15 @@ TACTIC EXTEND ssrexact
 | [ "exact" jisuanji_ssrexactarg(arg) ] -> {
      let views, (gens_clr, _) = arg in
      V82.tactic (tclBY (V82.of_tactic (inner_ssrapplytac views gens_clr ist))) }
+| [ "确切" (* "确切" "queqie" ; OLD : "exact" *) jisuanji_ssrexactarg(arg) ] -> {
+     let views, (gens_clr, _) = arg in
+     V82.tactic (tclBY (V82.of_tactic (inner_ssrapplytac views gens_clr ist))) }
 | [ "exact" ] -> {
      V82.tactic (Tacticals.tclORELSE (donetac ~-1) (tclBY (V82.of_tactic apply_top_tac))) }
+| [ "确切" (* "确切" "queqie" ; OLD : "exact" *) ] -> {
+     V82.tactic (Tacticals.tclORELSE (donetac ~-1) (tclBY (V82.of_tactic apply_top_tac))) }
 | [ "exact" "<:" lconstr(pf) ] -> { vmexacttac pf }
+| [ "确切" (* "确切" "queqie" ; OLD : "exact" *) "<:" lconstr(pf) ] -> { vmexacttac pf }
 END
 
 (** The "congr" tactic *)
@@ -2424,6 +2441,8 @@ END
 TACTIC EXTEND ssrrewrite
   | [ "rewrite" jisuanji_ssrrwargs(args) jisuanji_ssrclauses(clauses) ] ->
     { tclCLAUSES (old_tac (ssrrewritetac ist args)) clauses }
+  | [ "改写" (* "改写" "gaixie" ; OLD: "rewrite" *) jisuanji_ssrrwargs(args) jisuanji_ssrclauses(clauses) ] ->
+    { tclCLAUSES (old_tac (ssrrewritetac ist args)) clauses }
 END
 
 (** The "unlock" tactic *)
@@ -2488,10 +2507,17 @@ GRAMMAR EXTEND Gram
   tactic_expr: LEVEL "3"
     [ RIGHTA [ IDENT "abstract"; gens = jisuanji_ssrdgens ->
                { ssrtac_expr ~loc "abstract"
+                [Tacexpr.TacGeneric (Genarg.in_gen (Genarg.rawwit wit_jisuanji_ssrdgens) gens)] }
+	      | IDENT "抽象" (* "抽象" "chouxiang" ; OLD : "abstract" *); gens = jisuanji_ssrdgens ->
+               { ssrtac_expr ~loc "抽象" (* "抽象" "chouxiang" ; OLD : "abstract" *)
                 [Tacexpr.TacGeneric (Genarg.in_gen (Genarg.rawwit wit_jisuanji_ssrdgens) gens)] } ]];
 END
 TACTIC EXTEND ssrabstract
 | [ "abstract" jisuanji_ssrdgens(gens) ] -> {
+    if List.length (fst gens) <> 1 then
+      errorstrm (str"dependents switches '/' not allowed here");
+    Ssripats.ssrabstract (ssrdgens_of_parsed_dgens gens) }
+| [ "抽象" (* "抽象" "chouxiang" ; OLD : "abstract" *) jisuanji_ssrdgens(gens) ] -> {
     if List.length (fst gens) <> 1 then
       errorstrm (str"dependents switches '/' not allowed here");
     Ssripats.ssrabstract (ssrdgens_of_parsed_dgens gens) }
@@ -2500,11 +2526,21 @@ END
 TACTIC EXTEND ssrhave
 | [ "have" jisuanji_ssrhavefwdwbinders(fwd) ] ->
   { V82.tactic (havetac ist fwd false false) }
+| [ "具有" (* "具有" "juyou" ; OLD : "have" *) jisuanji_ssrhavefwdwbinders(fwd) ] ->
+  { V82.tactic (havetac ist fwd false false) }
 END
 
 TACTIC EXTEND ssrhavesuff
 | [ "have" "suff" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrhavefwd(fwd) ] ->
   { V82.tactic (havetac ist (false,(pats,fwd)) true false) }
+| [ "have_under" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrhavefwd(fwd) ] ->
+  { V82.tactic (havetac ist (false,(pats,fwd)) true false) }
+| [ "具有_下" (* "具有_下" "juyou xia" ; OLD : "have_under" *) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrhavefwd(fwd) ] ->
+  { V82.tactic (havetac ist (false,(pats,fwd)) true false) }
+| [ "suffices_under" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrhavefwd(fwd) ] ->
+  { Proofview.tclTHEN (V82.tactic (havetac ist (false,(pats,fwd)) true false)) (Proofview.revgoals) }
+| [ "满足_下" (* "满足_下" "manzu xia" ; OLD : "suffices_under" *) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrhavefwd(fwd) ] ->
+  { Proofview.tclTHEN (V82.tactic (havetac ist (false,(pats,fwd)) true false)) (Proofview.revgoals) }
 END
 
 TACTIC EXTEND ssrhavesuffices
@@ -2515,6 +2551,14 @@ END
 TACTIC EXTEND ssrsuffhave
 | [ "suff" "have" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrhavefwd(fwd) ] ->
   { V82.tactic (havetac ist (false,(pats,fwd)) true true) }
+| [ "suffices_relatively" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrhavefwd(fwd) ] ->
+  { V82.tactic (havetac ist (false,(pats,fwd)) true true) }
+| [ "满足_相对" (* "满足_相对" "manzu xiangdui" ; OLD : "suffices_relatively" *) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrhavefwd(fwd) ] ->
+  { V82.tactic (havetac ist (false,(pats,fwd)) true true) }
+| [ "have_relatively" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrhavefwd(fwd) ] ->
+  { Proofview.tclTHEN (V82.tactic (havetac ist (false,(pats,fwd)) true true)) (Proofview.revgoals)  }
+| [ "具有_相对" (* "具有_相对" "juyou xiangdui" ; OLD : "have_relatively" *) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrhavefwd(fwd) ] ->
+  { Proofview.tclTHEN (V82.tactic (havetac ist (false,(pats,fwd)) true true)) (Proofview.revgoals)  }
 END
 
 TACTIC EXTEND ssrsufficeshave
@@ -2544,6 +2588,7 @@ END
 
 TACTIC EXTEND ssrsuff
 | [ "suff" jisuanji_ssrsufffwd(fwd) ] -> { V82.tactic (sufftac ist fwd) }
+| [ "满足" (* "满足" "manzu" ; OLD : "suffices" *) jisuanji_ssrsufffwd(fwd) ] -> { V82.tactic (sufftac ist fwd) }
 END
 
 TACTIC EXTEND ssrsuffices
@@ -2570,10 +2615,22 @@ END
 TACTIC EXTEND ssrwlog
 | [ "wlog" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
   { V82.tactic (wlogtac ist pats fwd hint false `NoGen) }
+| [ "parametric" "have_relatively" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
+  { V82.tactic (wlogtac ist pats fwd hint false `NoGen) }
+| [ "参" (* "参数" "canshu" ; OLD : "parametric" *) "具有_相对" (* "具有_相对" "juyou xiangdui" ; OLD : "have_relatively" *) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
+  { V82.tactic (wlogtac ist pats fwd hint false `NoGen) }
+| [ "parametric" "suffices_relatively" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
+  { Proofview.tclTHEN (V82.tactic (wlogtac ist pats fwd hint false `NoGen)) (Proofview.revgoals) }
+| [ "参" (* "参数" "canshu" ; OLD : "parametric" *) "满足_相对" (* "满足_相对" "manzu xiangdui" ; OLD : "suffices_relatively" *) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
+  { Proofview.tclTHEN (V82.tactic (wlogtac ist pats fwd hint false `NoGen)) (Proofview.revgoals) }
 END
 
 TACTIC EXTEND ssrwlogs
 | [ "wlog" "suff" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
+  { V82.tactic (wlogtac ist pats fwd hint true `NoGen) }
+| [ "simultaneous" "suffices" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
+  { V82.tactic (wlogtac ist pats fwd hint true `NoGen) }
+| [ "同时" (* "同时" "tongshi" ; OLD : "simultaneous" *) "满足" (* "满足" "manzu" ; OLD : "suffices" *) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
   { V82.tactic (wlogtac ist pats fwd hint true `NoGen) }
 END
 
@@ -2644,6 +2701,14 @@ let augment_preclr clr1 (((clr0, x),y),z) =
 
 TACTIC EXTEND jisuanji_ssrgenhave
 | [ "gen" "have" jisuanji_ssrclear(clr)
+    jisuanji_ssr_idcomma(id) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
+  { let pats = augment_preclr clr pats in
+    V82.tactic (wlogtac ist pats fwd hint false (`Gen id)) }
+| [ "simultaneous" "have" jisuanji_ssrclear(clr)
+    jisuanji_ssr_idcomma(id) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
+  { let pats = augment_preclr clr pats in
+    V82.tactic (wlogtac ist pats fwd hint false (`Gen id)) }
+| [ "同时" (* "同时" "tongshi" ; OLD : "simultaneous" *) "具有" (* "具有" "juyou" ; OLD : "have" *) jisuanji_ssrclear(clr)
     jisuanji_ssr_idcomma(id) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
   { let pats = augment_preclr clr pats in
     V82.tactic (wlogtac ist pats fwd hint false (`Gen id)) }
