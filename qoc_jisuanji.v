@@ -32,7 +32,7 @@ End ABC一二三 .
 OOO1337777 , COQ , 鸡算计 , mathematics , 数学 - logic , variables , proof - 逻辑，变量，证明
 https://www.bilibili.com/video/av45747037
  *)
-Load qoc_jisuanji_logic_variables_proof .
+Require qoc_jisuanji_logic_variables_proof .
 
 (** + ‎‎Friday, ‎March ‎15, ‎2019, ‏‎22:22:35
 OOO1337777 , COQ , 鸡算计 , mathematics , 数学 - inductive - 归纳的

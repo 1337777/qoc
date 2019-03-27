@@ -1558,7 +1558,7 @@ END
 
 let sq_brace_tacnames =
    ["first"; "solve"; "do"; "rewrite"; "改写" (* "改写" "gaixie" ; OLD: "rewrite" *); "have"; "suffices"; "wlog";
-   "parametric"; "参" (* "参数" "canshu" ; OLD : "parametric" *) ; "have_relatively" ; "suffices_relatively" (* ; "suffice" *) ; "have_under" ; "suffices_under" ; "具有" (* "具有" "juyou" ; OLD : "have" *) ; "满足" (* "满足" "manzu" ; OLD : "suffices" *) ; "同时" (* "同时" "tongshi" ; OLD : "simultaneous" *) ; "具有_相对" (* "具有_相对" "juyou xiangdui" ; OLD : "have_relatively" *) ; "具有_下" (* "具有_下" "juyou xia" ; OLD : "have_under" *) ; "满足_相对" (* "满足_相对" "manzu xiangdui" ; OLD : "suffices_relatively" *) ; "满足_下" (* "满足_下" "manzu xia" ; OLD : "suffices_under" *) ]
+   "parametric"; "参" (* "参" "can" ; OLD : "parametric" *) ; "have_relatively" ; "suffices_relatively" (* ; "suffice" *) ; "have_under" ; "suffices_under" ; "具有" (* "具有" "juyou" ; OLD : "have" *) ; "满足" (* "满足" "manzu" ; OLD : "suffices" *) ; "同时" (* "同时" "tongshi" ; OLD : "simultaneous" *) ; "具有_相对" (* "具有_相对" "juyou xiangdui" ; OLD : "have_relatively" *) ; "具有_下" (* "具有_下" "juyou xia" ; OLD : "have_under" *) ; "满足_相对" (* "满足_相对" "manzu xiangdui" ; OLD : "suffices_relatively" *) ; "满足_下" (* "满足_下" "manzu xia" ; OLD : "suffices_under" *) ]
    (* "by" is a keyword *)
 let accept_ssrseqvar strm =
   match stream_nth 0 strm with
@@ -2617,11 +2617,11 @@ TACTIC EXTEND ssrwlog
   { V82.tactic (wlogtac ist pats fwd hint false `NoGen) }
 | [ "parametric" "have_relatively" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
   { V82.tactic (wlogtac ist pats fwd hint false `NoGen) }
-| [ "参" (* "参数" "canshu" ; OLD : "parametric" *) "具有_相对" (* "具有_相对" "juyou xiangdui" ; OLD : "have_relatively" *) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
+| [ "参" (* "参" "can" ; OLD : "parametric" *) "具有_相对" (* "具有_相对" "juyou xiangdui" ; OLD : "have_relatively" *) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
   { V82.tactic (wlogtac ist pats fwd hint false `NoGen) }
 | [ "parametric" "suffices_relatively" jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
   { Proofview.tclTHEN (V82.tactic (wlogtac ist pats fwd hint false `NoGen)) (Proofview.revgoals) }
-| [ "参" (* "参数" "canshu" ; OLD : "parametric" *) "满足_相对" (* "满足_相对" "manzu xiangdui" ; OLD : "suffices_relatively" *) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
+| [ "参" (* "参" "can" ; OLD : "parametric" *) "满足_相对" (* "满足_相对" "manzu xiangdui" ; OLD : "suffices_relatively" *) jisuanji_ssrhpats_nobs(pats) jisuanji_ssrwlogfwd(fwd) jisuanji_ssrhint(hint) ] ->
   { Proofview.tclTHEN (V82.tactic (wlogtac ist pats fwd hint false `NoGen)) (Proofview.revgoals) }
 END
 

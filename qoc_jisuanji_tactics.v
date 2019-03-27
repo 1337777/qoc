@@ -165,3 +165,4 @@ End Generalization_example .
 
 End Tactics .
 
+Print Tactics .
