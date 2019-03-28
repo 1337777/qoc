@@ -3,9 +3,15 @@ Import ssreflect .
 
 (**MEMO: 
 
-  In the most general text , [E] is the END/goal . And [S] is some weaker SUB-end/goal which suffices ( expressed as [ S -> E ] ) for the end/goal [E] .
+  短 :: 为了从“A”到“E”的目标，搜索/猜测某些“S”从“A”到“S”然后从“S”变为“E”可能更明智/更具策略性“。
+  
+  Short :: for the goal of going from "A" to "E" , it may be more sensible/tactical to search/guess some "S" such to go from "A" to "S" then to go from "S" to "E" .
 
-  In the less general text , [W] is some WEAKENER which defines this sub-end/goal [ S := (W -> E) ] ( the end UNDER [W] ) , which suffices ( [ (W -> E) -> E ] ) for the end/goal [E] . Alternatively , oneself may transpose this precedent result and view the sufficiency expression as [ W -> E ] and the sub-end/goal as [ S := ( (W -> E) -> E ) ] ( the RELATIVE [W] , which is some style of double negation of [W] above the end [E] not the bottom [False] )
+  It may be more-sensible to refine/start/open the top of some deduction/proof of some end/goal [A |- E] by sequencing this deduction into two more-sensible parts/halves [A |- S] and [A |- S -> E] , where oneself shall search/guess/devine the mediator [S] by using the contextual sense of the end/goal . 
+
+  In the most general text , [E] is the END/goal . And [S] is some SEARCHED/guessed/devined weaker SUB-end/goal which suffices ( expressed as [ S -> E ] ) for the end/goal [E] .
+
+  In the less general text , [W] is some searched/guessed/devined WEAKENER which defines this particular sub-end/goal [ S := (W -> E) ] ( the end UNDER [W] ) , which suffices ( [ (W -> E) -> E ] ) for the end/goal [E] . Alternatively , oneself may transpose this precedent result and view the sufficiency expression as [ W -> E ] and the sub-end/goal as [ S := ( (W -> E) -> E ) ] ( the RELATIVE [W] , which is some style of double negation of [W] above the end [E] not the bottom [False] )
 
   Everythere , the identifier [p] is some outer-parameter and [x] is some (varying) inner-argument . And the sense for the identifier [x] is not binary , possible senses are : [simultaneous] identifier , [parametric]/singly/pointwise identifier , [none] identifier .
 
@@ -168,14 +174,52 @@ Abort .
 
 End Generalization_example .
 
-Definition lem1 : forall n : nat , nat .
+Definition tactics1 : forall n : nat , nat .
 Proof .
   move => m . Undo .
   移动 => m .
 
+  apply : m . Undo .
+  应用 : m . Undo .
+
   exact : m . Undo .
-  确切 : m .
+  确切 : m . Undo .
+
+  elim : m . Undo .
+  消除 : m . Undo .
+
+  case : m . Undo .
+  例子 : m . Undo .
+  
 Abort.
+
+Lemma tactics_abstract (n m : nat) : True.
+
+  have [:Sm] @plus_n_Sm : nat .
+  { apply: (plus n).
+    abstract: Sm.
+    { exact: (S m).
+    }
+  }
+
+  Restart .
+
+  具有 [:Sm] @plus_n_Sm : nat .
+  { 应用: (plus n).
+    抽象: Sm.
+    { 确切: (S m).
+    }
+  }
+
+Abort.
+
+Definition tactics_rewrite : forall n m : nat , n = m -> m = n .
+Proof .
+  intros n m H.
+  rewrite H . Undo .
+  改写 H . Undo .
+Abort.
+
 
 Lemma tactic_pose : True.
   pose f x y := x + y . Undo .

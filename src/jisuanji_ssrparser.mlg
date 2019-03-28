@@ -2554,7 +2554,7 @@ GRAMMAR EXTEND Gram
                { ssrtac_expr ~loc "abstract"
                 [Tacexpr.TacGeneric (Genarg.in_gen (Genarg.rawwit wit_jisuanji_ssrdgens) gens)] }
 	      | IDENT "抽象" (* "抽象" "chouxiang" ; OLD : "abstract" *); gens = jisuanji_ssrdgens ->
-               { ssrtac_expr ~loc "抽象" (* "抽象" "chouxiang" ; OLD : "abstract" *)
+               { ssrtac_expr ~loc "abstract"
                 [Tacexpr.TacGeneric (Genarg.in_gen (Genarg.rawwit wit_jisuanji_ssrdgens) gens)] } ]];
 END
 TACTIC EXTEND ssrabstract
