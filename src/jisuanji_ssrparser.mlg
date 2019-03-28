@@ -1394,7 +1394,7 @@ END
 
 {
 
-let pr_ssrfixfwd _ _ _ (id, fwd) = str " fix " ++ pr_id id ++ pr_fwd fwd
+let pr_ssrfixfwd _ _ _ (id, fwd) = str  " 固定 " (* " 固定 " " guding " ; OLD : " fix " *) ++ pr_id id ++ pr_fwd fwd
 
 let bvar_locid = function
   | { CAst.v = CRef (qid, _) } when qualid_is_ident qid ->
@@ -1424,6 +1424,26 @@ ARGUMENT EXTEND jisuanji_ssrfixfwd TYPED AS (ident * jisuanji_ssrfwd) PRINTED BY
       let h' = BFrec (has_struct, has_cast) :: binders_fmts bs in
       let fix = CAst.make ~loc @@ CFix (lid, [lid, (Some i, CStructRec), lb, t', c']) in
       id, ((fk, h'),  { ac with body = fix }) }
+  | [ "固定" (* "固定" "guding" ; OLD : "fix" *) jisuanji_ssrbvar(bv) jisuanji_ssrbinder_list(bs) jisuanji_ssrstruct(sid) jisuanji_ssrfwd(fwd) ] ->
+    { let { CAst.v=id } as lid = bvar_locid bv in
+      let (fk, h), ac = fwd in
+      let c = ac.body in
+      let has_cast, t', c' = match format_constr_expr h c with
+      | [Bcast t'], c' -> true, t', c'
+      | _ -> false, mkCHole (constr_loc c), c in
+      let lb = fix_binders bs in
+      let has_struct, i =
+        let rec loop = function
+          | {CAst.loc=l'; v=Name id'} :: _ when Option.equal Id.equal sid (Some id') ->
+            true, CAst.make ?loc:l' id'
+          | [{CAst.loc=l';v=Name id'}] when sid = None ->
+            false, CAst.make ?loc:l' id'
+          | _ :: bn -> loop bn
+          | [] -> CErrors.user_err (Pp.str "Bad structural argument") in
+        loop (names_of_local_assums lb) in
+      let h' = BFrec (has_struct, has_cast) :: binders_fmts bs in
+      let fix = CAst.make ~loc @@ CFix (lid, [lid, (Some i, CStructRec), lb, t', c']) in
+      id, ((fk, h'),  { ac with body = fix }) }
 END
 
 
@@ -1431,12 +1451,23 @@ END
 
 {
 
-let pr_ssrcofixfwd _ _ _ (id, fwd) = str " cofix " ++ pr_id id ++ pr_fwd fwd
+let pr_ssrcofixfwd _ _ _ (id, fwd) = str " 反固定 " (* " 反固定 " " fan guding " ; OLD : " cofix " *) ++ pr_id id ++ pr_fwd fwd
 
 }
 
 ARGUMENT EXTEND jisuanji_ssrcofixfwd TYPED AS jisuanji_ssrfixfwd PRINTED BY { pr_ssrcofixfwd }
   | [ "cofix" jisuanji_ssrbvar(bv) jisuanji_ssrbinder_list(bs) jisuanji_ssrfwd(fwd) ] ->
+    { let { CAst.v=id } as lid = bvar_locid bv in
+      let (fk, h), ac = fwd in
+      let c = ac.body in
+      let has_cast, t', c' = match format_constr_expr h c with
+      | [Bcast t'], c' -> true, t', c'
+      | _ -> false, mkCHole (constr_loc c), c in
+      let h' = BFrec (false, has_cast) :: binders_fmts bs in
+      let cofix = CAst.make ~loc @@ CCoFix (lid, [lid, fix_binders bs, t', c']) in
+      id, ((fk, h'), { ac with body = cofix })
+    }
+  | [ "反固定" (* "反固定" "fan guding" ; OLD : "cofix" *) jisuanji_ssrbvar(bv) jisuanji_ssrbinder_list(bs) jisuanji_ssrfwd(fwd) ] ->
     { let { CAst.v=id } as lid = bvar_locid bv in
       let (fk, h), ac = fwd in
       let c = ac.body in
@@ -1536,7 +1567,7 @@ END
 (* type ssrseqarg = jisuanji_ssrindex * (ssrtacarg * ssrtac option) *)
 
 let pr_seqtacarg prt = function
-  | (is_first, []), _ -> str (if is_first then "first" else "last")
+  | (is_first, []), _ -> str (if is_first then "前" (* "前" "qian" ; OLD: "first" *) else "后" (* "后" "hou" ; OLD: "last" *))
   | tac, Some dtac ->
     hv 0 (pr_hintarg prt tac ++ spc() ++ str "|| " ++ prt tacltop dtac)
   | tac, _ -> pr_hintarg prt tac
@@ -1557,13 +1588,13 @@ END
 {
 
 let sq_brace_tacnames =
-   ["first"; "solve"; "do"; "rewrite"; "改写" (* "改写" "gaixie" ; OLD: "rewrite" *); "have"; "suffices"; "wlog";
+   ["first"; "前" (* "前" "qian" ; OLD: "first" *) ; "solve"; "do"; "rewrite"; "改写" (* "改写" "gaixie" ; OLD: "rewrite" *); "have"; "suffices"; "wlog";
    "parametric"; "参" (* "参" "can" ; OLD : "parametric" *) ; "have_relatively" ; "suffices_relatively" (* ; "suffice" *) ; "have_under" ; "suffices_under" ; "具有" (* "具有" "juyou" ; OLD : "have" *) ; "满足" (* "满足" "manzu" ; OLD : "suffices" *) ; "同时" (* "同时" "tongshi" ; OLD : "simultaneous" *) ; "具有_相对" (* "具有_相对" "juyou xiangdui" ; OLD : "have_relatively" *) ; "具有_下" (* "具有_下" "juyou xia" ; OLD : "have_under" *) ; "满足_相对" (* "满足_相对" "manzu xiangdui" ; OLD : "suffices_relatively" *) ; "满足_下" (* "满足_下" "manzu xia" ; OLD : "suffices_under" *) ]
    (* "by" is a keyword *)
 let accept_ssrseqvar strm =
   match stream_nth 0 strm with
   | Tok.IDENT id when not (List.mem id sq_brace_tacnames) ->
-     accept_before_syms_or_ids ["["] ["first";"last"] strm
+     accept_before_syms_or_ids ["["] ["first"; "前" (* "前" "qian" ; OLD: "first" *) ; "last" ; "后" (* "后" "hou" ; OLD: "last" *) ] strm
   | _ -> raise Stream.Failure
 
 let test_ssrseqvar = Pcoq.Entry.of_parser "test_ssrseqvar" accept_ssrseqvar
@@ -1587,7 +1618,10 @@ GRAMMAR EXTEND Gram
     [ test_ssrseqvar; id = Prim.ident -> { ArgVar (CAst.make ~loc id) }
     | n = Prim.natural -> { ArgArg (check_index ~loc n) }
     ] ];
-  ssrswap: [[ IDENT "first" -> { loc, true } | IDENT "last" -> { loc, false } ]];
+  ssrswap: [[ IDENT "first" -> { loc, true }
+  | IDENT "前" (* "前" "qian" ; OLD: "first" *) -> { loc, true }
+  | IDENT "last" -> { loc, false }
+  | IDENT "后" (* "后" "hou" ; OLD: "last" *) -> { loc, false } ]];
   ssrorelse: [[ "||"; tac = tactic_expr LEVEL "2" -> { tac } ]];
   jisuanji_ssrseqarg: [
     [ arg = ssrswap -> { noindex, swaptacarg arg }
@@ -1827,8 +1861,8 @@ END
 (* We can't actually parse the direction separately because this   *)
 (* would introduce conflicts with the basic ltac syntax.           *)
 let pr_ssrseqdir _ _ _ = function
-  | L2R -> str ";" ++ spc () ++ str "first "
-  | R2L -> str ";" ++ spc () ++ str "last "
+  | L2R -> str ";" ++ spc () ++ str "前" (* "前 " "qian " ; OLD: "first" *)  ++ str " "
+  | R2L -> str ";" ++ spc () ++ str "后" (* "后 " "hou " ; OLD: "last" *) ++ str " "
 
 }
 
@@ -1865,9 +1899,15 @@ GRAMMAR EXTEND Gram
   tactic_expr: LEVEL "4" [ LEFTA
     [ tac1 = tactic_expr; ";"; IDENT "first"; tac2 = ssr_first_else ->
       { TacThen (tac1, tac2) }
+    | tac1 = tactic_expr; ";"; IDENT "前" (* "前" "qian" ; OLD: "first" *); tac2 = ssr_first_else ->
+      { TacThen (tac1, tac2) }
     | tac = tactic_expr; ";"; IDENT "first"; arg = jisuanji_ssrseqarg ->
       { tclseq_expr ~loc tac L2R arg }
+    | tac = tactic_expr; ";"; IDENT "前" (* "前" "qian" ; OLD: "first" *); arg = jisuanji_ssrseqarg ->
+      { tclseq_expr ~loc tac L2R arg }
     | tac = tactic_expr; ";"; IDENT "last"; arg = jisuanji_ssrseqarg ->
+      { tclseq_expr ~loc tac R2L arg }
+    | tac = tactic_expr; ";"; IDENT "后" (* "后" "hou" ; OLD: "last" *); arg = jisuanji_ssrseqarg ->
       { tclseq_expr ~loc tac R2L arg }
     ] ];
 END
@@ -2481,8 +2521,11 @@ END
 
 TACTIC EXTEND ssrpose
 | [ "pose" jisuanji_ssrfixfwd(ffwd) ] -> { V82.tactic (ssrposetac ffwd) }
+| [ "摆" (* "摆" "bai" ; OLD : "pose" *) jisuanji_ssrfixfwd(ffwd) ] -> { V82.tactic (ssrposetac ffwd) }
 | [ "pose" jisuanji_ssrcofixfwd(ffwd) ] -> { V82.tactic (ssrposetac ffwd) }
+| [ "摆" (* "摆" "bai" ; OLD : "pose" *) jisuanji_ssrcofixfwd(ffwd) ] -> { V82.tactic (ssrposetac ffwd) }
 | [ "pose" jisuanji_ssrfwdid(id) jisuanji_ssrposefwd(fwd) ] -> { V82.tactic (ssrposetac (id, fwd)) }
+| [ "摆" (* "摆" "bai" ; OLD : "pose" *) jisuanji_ssrfwdid(id) jisuanji_ssrposefwd(fwd) ] -> { V82.tactic (ssrposetac (id, fwd)) }
 END
 
 (** The "set" tactic *)
@@ -2491,6 +2534,8 @@ END
 
 TACTIC EXTEND ssrset
 | [ "set" jisuanji_ssrfwdid(id) jisuanji_ssrsetfwd(fwd) jisuanji_ssrclauses(clauses) ] ->
+  { tclCLAUSES (old_tac (ssrsettac id fwd)) clauses }
+| [ "摆列" (* "摆列" "bailie" ; OLD : "set" *) jisuanji_ssrfwdid(id) jisuanji_ssrsetfwd(fwd) jisuanji_ssrclauses(clauses) ] ->
   { tclCLAUSES (old_tac (ssrsettac id fwd)) clauses }
 END
 

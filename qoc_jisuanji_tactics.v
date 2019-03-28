@@ -1,4 +1,5 @@
 From Qoc Require Import Jisuanji .
+Import ssreflect .
 
 (**MEMO: 
 
@@ -167,14 +168,50 @@ Abort .
 
 End Generalization_example .
 
-Section Move .
+Definition lem1 : forall n : nat , nat .
+Proof .
+  move => m . Undo .
+  移动 => m .
 
-  Definition lem1 : forall n : nat , nat .
-  Proof .
-    移动 => m . exact : m .
-  Defined .
+  exact : m . Undo .
+  确切 : m .
+Abort.
 
-End Move .
+Lemma tactic_pose : True.
+  pose f x y := x + y . Undo .
+  摆 f x y := x + y. Undo .
+
+  pose fix f (x y : nat) {struct x} : nat :=
+    if x is S p then S (f p y) else 0 . 
+  Undo .
+  摆 固定 f (x y : nat) {struct x} : nat :=
+    if x is S p then S (f p y) else 0 .
+  Undo .
+Abort .
+
+Lemma tactic_set (x y z : nat) :  x + y = z.
+  set t := _ x.  Undo .
+  摆列 t := _ x . Undo .
+Abort .
+
+Inductive test : nat -> Prop :=
+| C1 : forall n , n = 1 -> test n
+| C2 : forall n , n = 2 -> test n
+| C3 : forall n , n = 3 -> test n
+| C4 : forall n , n = 4 -> test n 
+| C5 : forall n , n = 5 -> test n .
+
+Lemma tactic_last n (t : test n) : True.
+  case : t ;
+    last 2 [ move => k3 | move => k4 ] . Undo .
+  例子 : t ;
+    后 2 [ 移动 => k3 | 移动 => k4 ] . Undo .
+
+  case : t ;
+     first last . Undo .
+  例子 : t ;
+    前 后 .
+Abort.
 
 End Tactics .
 
