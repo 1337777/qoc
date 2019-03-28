@@ -1,24 +1,28 @@
 From Qoc Require Import Jisuanji .
 
-(**
+(**MEMO: 
 
-(**MEMO: [W] is the weakener and [E] is the end . And [ (W -> E) -> E ] is some style of double negation of [W] above the end [E] ( instead of the common bottom/end which is [False] ) *)
-(**MEMO: the identifier [p] is some outer-parameter ; the sense  for the identifier [x] is not binary ,
-	 possibilities are : [simultaneous] identifier , [parametric]/singly/pointwise identifier , [none] identifier *)
+  In the most general text , [E] is the END/goal . And [S] is some weaker SUB-end/goal which suffices ( expressed as [ S -> E ] ) for the end/goal [E] .
 
-+ simultaneous have w_ , w_x : x / W p x
-  1(instance): x |- W p x
-  2(generalized): x ; w_ : (forall x , W p x) ; w_x : W x |- E p x
-  * have w : W
-    1(instance): |- W
-    2(generalized): w : W |- E
+  In the less general text , [W] is some WEAKENER which defines this sub-end/goal [ S := (W -> E) ] ( the end UNDER [W] ) , which suffices ( [ (W -> E) -> E ] ) for the end/goal [E] . Alternatively , oneself may transpose this precedent result and view the sufficiency expression as [ W -> E ] and the sub-end/goal as [ S := ( (W -> E) -> E ) ] ( the RELATIVE [W] , which is some style of double negation of [W] above the end [E] not the bottom [False] )
 
-+ simultaneous suffices w_ : x / W p x
-  1(generalized): x ; w_ : (forall x , W p x) |- E p x
-  2(instance): x |- W p x
-  * suffices w : W
-    1(generalized): w : W |- E
-    2(instance): |- W
+  Everythere , the identifier [p] is some outer-parameter and [x] is some (varying) inner-argument . And the sense for the identifier [x] is not binary , possible senses are : [simultaneous] identifier , [parametric]/singly/pointwise identifier , [none] identifier .
+
+-----
+
++ simultaneous have s_ , s_x : x / S p x
+  1(instance): x |- S p x
+  2(generalized): x ; s_ : (forall x , S p x) ; s_x : S x |- E p x
+  * have s : S
+    1(instance): |- S
+    2(generalized): s : S |- E
+
++ simultaneous suffices s_ : x / S p x
+  1(generalized): x ; s_ : (forall x , S p x) |- E p x
+  2(instance): x |- S p x
+  * suffices s : S
+    1(generalized): s : S |- E
+    2(instance): |- S
 
 + parametric have_relatively w : x / W p x
   1(instance): x |- (forall x , W p x -> E p x) -> E p x
@@ -42,15 +46,15 @@ From Qoc Require Import Jisuanji .
 
 -----
 
-+ simultaneous have w_ , w_x : x / W p x
-  := gen have w_ , w_x : x / W p x
-  * have w : W
-    := have w : W
++ simultaneous have s_ , s_x : x / S p x
+  := gen have s_ , s_x : x / S p x
+  * have s : S
+    := have s : S
 
-+ simultaneous suffices w_ : x / W p x
-  := wlog suff w_ : x / W p x
-  * suffices w : W
-    := suff w : W
++ simultaneous suffices s_ : x / S p x
+  := wlog suff s_ : x / S p x
+  * suffices s : S
+    := suff s : S
 
 + parametric have_relatively w : x / W p x
   := wlog w : x / W a x
@@ -70,46 +74,44 @@ From Qoc Require Import Jisuanji .
 
 Module Tactics .
 
-Section Move .
-
-  Definition lem1 : forall n : nat , nat .
-  Proof .
-    移动 => m . exact : m .
-  Defined .
-
-End Move .
-
 Section Generalization .
 
-  Variable E : forall (p : bool) (x : nat) , Type .
-  Variable W : forall (p : bool) (x : nat) , Type .
+  Variable E : forall (p : bool) (x : bool) , Type .
+  Variable S : forall (p : bool) (x : bool) , Type .
+  Variable W : forall (p : bool) (x : bool) , Type .
   Variable p : bool .
 
-  Lemma lemma1 : forall x : nat , E p x .
+  Lemma lemma1 : forall x : bool , E p x .
   Proof.
     intros x .
 
-    simultaneous have w_ , w_x : x / W p x . Show 2 . Undo .
-    同时 具有 w_ , w_x : x / W p x . Show 2 . Undo .
-    (** 1(instance): x |- W p x
-       2(generalized): x ; w_ : (forall x , W p x) ; w_x : W x |- E p x *)
-    have w : W p x . Show 2. Undo.
-    具有 w : W p x . Show 2. Undo.
-    (** 1(instance): |- W
-       2(generalized): w : W |- E *)
+    simultaneous have s_ , s_x : x / S p x . Show 2 . Undo .
+    同时 具有 s_ , s_x : x / S p x . Show 2 . Undo .
+    (** 1(instance): x |- S p x
+       2(generalized): x ; s_ : (forall x , S p x) ; s_x : S x |- E p x *)
+    have s : S p x . Show 2. Undo.
+    具有 s : S p x . Show 2. Undo.
+    (** 1(instance): |- S
+       2(generalized): s : S |- E *)
+  Abort .
 
-    (** ----- *)
+  Lemma lemma1 : forall x : bool , E p x .
+  Proof.
+    intros x .
 
-    simultaneous suffices w_ : x / W p x . Show 2 . Undo .
-    同时 满足 w_ : x / W p x . Show 2 . Undo .
-    (** 1(generalized): x ; w_ : (forall x , W p x) |- E p x
-        2(instance): x |- W p x *)
-    suffices w : W p x . Show 2 . Undo .
-    满足 w : W p x . Show 2 . Undo .
-    (** 1(generalized): w : W |- E
-        2(instance): |- W *)
-    
-    (** ----- *)
+    simultaneous suffices s_ : x / S p x . Show 2 . Undo .
+    同时 满足 s_ : x / S p x . Show 2 . Undo .
+    (** 1(generalized): x ; s_ : (forall x , S p x) |- E p x
+        2(instance): x |- S p x *)
+    suffices s : S p x . Show 2 . Undo .
+    满足 s : S p x . Show 2 . Undo .
+    (** 1(generalized): s : S |- E
+        2(instance): |- S *)
+  Abort .
+
+  Lemma lemma1 : forall x : bool , E p x .
+  Proof.
+    intros x .
 
     parametric have_relatively w : x / W p x . Show 2 . Undo .
     参 具有_相对 w : x / W p x . Show 2 . Undo .
@@ -123,9 +125,12 @@ Section Generalization .
     具有_下 m : W p x . Show 2 . Undo .
     (** 1(instance): |- W -> E
        2(generalized): m : (W -> E) |- E *)
-    
-    (** ----- *)
+  Abort .
 
+  Lemma lemma1 : forall x : bool , E p x .
+  Proof.
+    intros x .
+    
     parametric suffices_relatively w : x / W p x . Show 2 . Undo .
     参 满足_相对 w : x / W p x . Show 2 . Undo .
     (** 1(generalized): x ; w : W p x |- E p x
@@ -138,8 +143,7 @@ Section Generalization .
     满足_下 m : W p x . Show 2 . Undo .
     (** 1(generalized): m : (W -> E) |- E
         2(instance): |- W -> E *)
-    
-  Abort All.  
+  Abort. 
 End Generalization .
 
 Section Generalization_example .
@@ -162,6 +166,15 @@ Proof .
 Abort .
 
 End Generalization_example .
+
+Section Move .
+
+  Definition lem1 : forall n : nat , nat .
+  Proof .
+    移动 => m . exact : m .
+  Defined .
+
+End Move .
 
 End Tactics .
 
