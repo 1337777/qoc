@@ -581,6 +581,8 @@ GRAMMAR EXTEND Gram
 	  { TacAtom (CAst.make ~loc @@ TacMutualFix (id,n,List.map mk_fix_tac fd)) }
       | "cofix"; id = ident; "with"; fd = LIST1 cofixdecl ->
 	  { TacAtom (CAst.make ~loc @@ TacMutualCofix (id,List.map mk_cofix_tac fd)) }
+      | "反固定" (* "反固定" "fan guding" ; OLD : "cofix" *) ; id = ident; "with"; fd = LIST1 cofixdecl ->
+	  { TacAtom (CAst.make ~loc @@ TacMutualCofix (id,List.map mk_cofix_tac fd)) }
 
       | IDENT "pose"; bl = bindings_with_parameters ->
 	  { let (id,b) = bl in TacAtom (CAst.make ~loc @@ TacLetTac (false,Names.Name.Name id,b,Locusops.nowhere,true,None)) }

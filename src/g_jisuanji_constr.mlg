@@ -33,7 +33,7 @@ open Pcoq.Constr
 let ldots_var = Id.of_string ".."
 
 let constr_kw =
-  [ "构" ; "近" ; "forall"; "用" ; "fun"; "作用" ; "match"; "匹配" ; "fix"; "固定" ; "cofix"; "with"; "与" ; "in"; "在"; "for";
+  [ "构" ; "近" ; "forall"; "用" ; "fun"; "作用" ; "match"; "匹配" ; "fix"; "固定" (* "固定" "guding" ; OLD : "fix" *) ; "cofix"; "反固定" (* "反固定" "fan guding" ; OLD : "cofix" *) ; "with"; "与" ; "in"; "在"; "for";
     "end"; "结束" ; "as"; "如" ; "let"; "让"; "if"; "若" ; "then"; "则" ; "else"; "否则" ; "return"; "返回" ;
     "Prop"; "Set";  "Type"; "类型" ; ".("; "_"; "..";
     "`{"; "`("; "{|"; "|}" ]
@@ -367,7 +367,9 @@ GRAMMAR EXTEND Gram
   ;
   fix_kw:
     [ [ "fix" -> { true }
-      | "cofix" -> { false } ] ]
+      | "固定" (* "固定" "guding" ; OLD : "fix" *) -> { true }
+      | "cofix" -> { false }
+      | "反固定" (* "反固定" "fan guding" ; OLD : "cofix" *) -> { false } ] ]
   ;
   fix_decl:
     [ [ id=identref; bl=binders_fixannot; ty=type_cstr; ":=";

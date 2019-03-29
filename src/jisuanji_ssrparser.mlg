@@ -2306,6 +2306,13 @@ TACTIC EXTEND ssrcongr
     | [gens], clr -> Tacticals.tclTHEN (genstac (gens,clr)) (newssrcongrtac arg ist)
     | _ -> errorstrm (str"Dependent family abstractions not allowed in congr")
   end }
+| [ "词头" (* "词头" "citou" ; OLD: "congr" *) jisuanji_ssrcongrarg(arg) ] ->
+{ let arg, dgens = arg in
+  V82.tactic begin
+    match dgens with
+    | [gens], clr -> Tacticals.tclTHEN (genstac (gens,clr)) (newssrcongrtac arg ist)
+    | _ -> errorstrm (str"Dependent family abstractions not allowed in congr")
+  end }
 END
 
 (** 7. Rewriting tactics (rewrite, unlock) *)
@@ -2513,6 +2520,8 @@ END
 
 TACTIC EXTEND ssrunlock
   | [ "unlock" jisuanji_ssrunlockargs(args) jisuanji_ssrclauses(clauses) ] ->
+    { tclCLAUSES (old_tac (unlocktac ist args)) clauses }
+  | [ "开锁" (* "开锁" "kaisuo" ; OLD: "unlock" *) jisuanji_ssrunlockargs(args) jisuanji_ssrclauses(clauses) ] ->
     { tclCLAUSES (old_tac (unlocktac ist args)) clauses }
 END
 
