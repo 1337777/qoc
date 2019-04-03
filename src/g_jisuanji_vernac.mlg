@@ -671,6 +671,8 @@ GRAMMAR EXTEND Gram
           { CAst.make ~loc @@ CMapply (mty,me) }
       | mty = module_type; "with"; decl = with_declaration ->
           { CAst.make ~loc @@ CMwith (mty,decl) }
+      | "let" ; decl = with_declaration ; "in" ; mty = module_type ->
+          { CAst.make ~loc @@ CMwith (mty,decl) }
       ] ]
   ;
   (* Proof using *)

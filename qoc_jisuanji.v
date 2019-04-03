@@ -25,6 +25,22 @@ From Qoc Require Import Jisuanji .
 
 End ABC一二三 .
 
+Local Set SsrIdents .
+Print Table SsrIdents .
+Unset SsrIdents .
+Print Table SsrIdents .
+Module BB .
+Module Export AA.
+Export Set jisuanji_SsrIdents .
+Print Table SsrIdents .
+End AA.
+Print Table SsrIdents .
+End BB.
+Print Table SsrIdents .
+Unset jisuanji_SsrIdents .
+Print Table SsrIdents .
+Print Tables.
+
 (**
 -----
 
@@ -53,7 +69,14 @@ https://www.bilibili.com/video/av47160352/
 *)
 Require qoc_jisuanji_parameter_option .
 
-(** + NEXT
+(** + Friday, March 29, 2019,  23:00:00
+OOO1337777 , COQ , 鸡算计 , mathematics , 数学 - tactic , suffice - 战术 , 满足
+https://bilibili.com/video/av47713482
 
 *)
 Require qoc_jisuanji_tactics .
+
+(** + NEXT
+
+*)
+Require qoc_jisuanji_environmental_parametrized_module .

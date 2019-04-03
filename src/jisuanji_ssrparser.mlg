@@ -1665,14 +1665,61 @@ let old_tac = V82.tactic
 
 let ssr_reserved_ids = Summary.ref ~name:"jisuanji_SSR:idents" true
 
+(* let export_option_value key = function
+  | Goptions.BoolValue b   -> b
+  | Goptions.IntValue x    -> Goptions.error_undeclared_key key
+  | Goptions.StringValue s -> Goptions.error_undeclared_key key
+  | Goptions.StringOptValue s -> Goptions.error_undeclared_key key
+*)
+
+(*let interruptible f x =
+    catch_break := true;
+    Control.check_for_interrupt ();
+    let r = f x in
+    catch_break := false;
+    r
+*)
+(*
+let get_options key () =
+try
+  let table = ref Goptions.OptionMap.empty in
+  table := (Goptions.get_tables ()) ;
+  let state = Goptions.OptionMap.find_opt key !table in
+  table := Goptions.OptionMap.empty ;
+    ( match state with
+     (Some {Goptions.opt_value = v ; _ }) -> export_option_value key v
+     | None -> false )
+with any -> false *)
+(*
+let get_options key () =
+  export_option_value key (Goptions.get_table key)
+*)			     
+
 (**TODO: jisuanji_  should same option *)
+(**TODO:
+
+diff in coq/library/goptions.ml :
+let get_table key =
+  let (name, depr, (read,_,_)) = OptionMap.find key !value_tab in
+   {
+      opt_name = name;
+      opt_depr = depr;
+      opt_value = read ();
+    }
+
+diff in coq/library/goptions.mli :
+val get_table : option_name -> option_state
+*)
 let () =
   Goptions.(declare_bool_option
     { optname  = "ssreflect identifiers";
       optkey   = ["jisuanji_SsrIdents"];
       optdepr  = false;
-      optread  = (fun _ -> !ssr_reserved_ids);
-      optwrite = (fun b -> ssr_reserved_ids := b)
+      optread  = (fun _ ->
+     	       match (Goptions.get_table ["SsrIdents"]).opt_value with
+	       	     BoolValue v -> v | _ -> anomaly ("async_option.") )
+      (* (fun _ -> (* let table =  (Goptions.get_tables ()) in *) !ssr_reserved_ids) *) ;
+      optwrite = (fun b -> Goptions.set_bool_option_value ["SsrIdents"] b) (* (fun b -> ssr_reserved_ids := b) *)
     })
 
 let is_ssr_reserved s =

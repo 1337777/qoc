@@ -7,6 +7,7 @@ qoc_jisuanji_inductive.v
 qoc_jisuanji_polymorphism_notation.v
 qoc_jisuanji_parameter_option.v
 qoc_jisuanji_tactics.v
+qoc_jisuanji_environmental_parametrized_module.v
 qoc_jisuanji.v
 
 src/jisuanji_ppconstr.ml
