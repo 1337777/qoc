@@ -40,7 +40,7 @@ open Pcoq.Module
 open Pvernac.Vernac_
 open Attributes
 
-let vernac_kw = [ ";"; ","; ">->"; ":<"; "<:"; "where"; "at" ]
+let vernac_kw = [ "进口" ; "出口" ; "从" ; ";"; ","; ">->"; ":<"; "<:"; "where"; "at" ]
 let _ = List.iter CLexer.add_keyword vernac_kw
 
 (* Rem: do not join the different GEXTEND into one, it breaks native *)
@@ -561,17 +561,49 @@ GRAMMAR EXTEND Gram
 	bl = LIST0 module_binder; sign = of_module_type;
 	body = is_module_expr ->
 	  { VernacDefineModule (export, id, bl, sign, body) }
-      | IDENT "包裹" (* "包裹" "baoguo" ; OLD: "Module" *) ; export = export_token; id = identref;
+      | "Modular"; "Prefixed" ; export = export_token; id = identref;
 	bl = LIST0 module_binder; sign = of_module_type;
+	body = is_module_expr ->
+	  { VernacDefineModule (export, id, bl, sign, body) }
+      | "包裹" (* "包裹" "baoguo" ; OLD: "Module" *) ;
+      	"词头了" (* "词头了" "citoule" ; OLD: "Prefixed" *) ; export = export_token; id = identref;
+	bl = LIST0 module_binder; sign = of_module_type;
+	body = is_module_expr ->
+	  { VernacDefineModule (export, id, bl, sign, body) }
+      | "Modular"; "Prefixed" ; "Alias" ; export = export_token; id = identref;
+	bl = LIST0 module_binder; sign = of_module_type_check;
+	body = is_module_expr ->
+	  { VernacDefineModule (export, id, bl, sign, body) }
+      | "包裹" (* "包裹" "baoguo" ; OLD: "Module" *);
+      	"词头了" (* "词头了" "citoule" ; OLD: "Prefixed" *);
+	"别号" (* "别号" "biehao" ; OLD : "Alias" *) ; export = export_token; id = identref;
+	bl = LIST0 module_binder; sign = of_module_type_check;
 	body = is_module_expr ->
 	  { VernacDefineModule (export, id, bl, sign, body) }
       | IDENT "Module"; "Type"; id = identref;
 	bl = LIST0 module_binder; sign = check_module_types;
 	body = is_module_type ->
 	  { VernacDeclareModuleType (id, bl, sign, body) }
+      | "Modular"; id = identref;
+	bl = LIST0 module_binder; sign = check_module_types;
+	body = is_module_type ->
+	  { VernacDeclareModuleType (id, bl, sign, body) }
+      | "包裹" (* "包裹" "baoguo" ; OLD: "Module Type" *) ; id = identref;
+	bl = LIST0 module_binder; sign = check_module_types;
+	body = is_module_type ->
+	  { VernacDeclareModuleType (id, bl, sign, body) }
       | IDENT "Declare"; IDENT "Module"; export = export_token; id = identref;
 	bl = LIST0 module_binder; ":"; mty = module_type_inl ->
 	  { VernacDeclareModule (export, id, bl, mty) }
+      | "Modular" ; "Prefixed"; "Parameter" ; export = export_token; id = identref;
+	bl = LIST0 module_binder; ":"; mty = module_type_inl ->
+	  { VernacDeclareModule (export, id, bl, mty) }
+      | "包裹" (* "包裹" "baoguo" ; OLD: "Module" *);
+        "词头了" (* "词头了" "citoule" ; OLD: "Prefixed" *);
+	"参数" (* "参数" "canshu" ; OLD: "Parameter" *) ; export = export_token; id = identref;
+	bl = LIST0 module_binder; ":"; mty = module_type_inl ->
+	  { VernacDeclareModule (export, id, bl, mty) }
+
       (* Section beginning *)
       | IDENT "部分" (* "部分" "bufen" ; OLD: "Section" *) ; id = identref -> { VernacBeginSection id }
       | IDENT "Chapter"; id = identref -> { VernacBeginSection id }
@@ -589,8 +621,13 @@ GRAMMAR EXTEND Gram
       | IDENT "From" ; ns = global ; IDENT "Require"; export = export_token
 	; qidl = LIST1 global ->
 	{ VernacRequire (Some ns, export, qidl) }
+      | "从" ; ns = global ;  "Require"; export = export_token
+	; qidl = LIST1 global ->
+	{ VernacRequire (Some ns, export, qidl) }
       | IDENT "Import"; qidl = LIST1 global -> { VernacImport (false,qidl) }
+      | "进口"; qidl = LIST1 global -> { VernacImport (false,qidl) }
       | IDENT "Export"; qidl = LIST1 global -> { VernacImport (true,qidl) }
+      | "出口"; qidl = LIST1 global -> { VernacImport (true,qidl) }
       | IDENT "Include"; e = module_type_inl; l = LIST0 ext_module_expr ->
 	  { VernacInclude(e::l) }
       | IDENT "Include"; "Type"; e = module_type_inl; l = LIST0 ext_module_type ->
@@ -599,7 +636,9 @@ GRAMMAR EXTEND Gram
   ;
   export_token:
     [ [ IDENT "Import" -> { Some false }
+      | IDENT "进口" -> { Some false }
       | IDENT "Export" -> { Some true }
+      | IDENT "出口" -> { Some true }
       |  -> { None } ] ]
   ;
   ext_module_type:
@@ -617,6 +656,9 @@ GRAMMAR EXTEND Gram
   of_module_type:
     [ [ ":"; mty = module_type_inl -> { Enforce mty }
       | mtys = check_module_types -> { Check mtys } ] ]
+  ;
+  of_module_type_check:
+    [ [ mtys = check_module_types -> { Check mtys } ] ]
   ;
   is_module_type:
     [ [ ":="; mty = module_type_inl ; l = LIST0 ext_module_type -> { (mty::l) }
@@ -671,7 +713,11 @@ GRAMMAR EXTEND Gram
           { CAst.make ~loc @@ CMapply (mty,me) }
       | mty = module_type; "with"; decl = with_declaration ->
           { CAst.make ~loc @@ CMwith (mty,decl) }
+      | mty = module_type; "跟" (* OLD: "with" *); decl = with_declaration ->
+          { CAst.make ~loc @@ CMwith (mty,decl) }
       | "let" ; decl = with_declaration ; "in" ; mty = module_type ->
+          { CAst.make ~loc @@ CMwith (mty,decl) }
+      | "让" ; decl = with_declaration ; "在" ; mty = module_type ->
           { CAst.make ~loc @@ CMwith (mty,decl) }
       ] ]
   ;
