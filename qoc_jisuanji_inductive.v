@@ -1,6 +1,6 @@
 From Qoc Require Import Jisuanji .
 
-包裹 无限数字包裹 .
+模块 无限数字模块 .
 (** Bāoguǒ wúxiàn shùzì bāoguǒ. *)  
 
 归纳的 无限数字 : 类型 :=
@@ -66,10 +66,10 @@ From Qoc Require Import Jisuanji .
 据证实 .
 (** Jù zhèngshí. *)
 
-结束 无限数字包裹 .
+结束 无限数字模块 .
 (** Jiéshù wúxiàn shùzì bāoguǒ. *)
 
-打印 无限数字包裹 .
+打印 无限数字模块 .
 (** Dǎyìn wúxiàn shùzì bāoguǒ. *)
 
 

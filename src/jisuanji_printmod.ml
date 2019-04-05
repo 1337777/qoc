@@ -40,7 +40,7 @@ let () =
   declare_bool_option
     { optdepr  = false;
       optname  = "short module printing";
-      optkey   = ["Short";"包裹";"Printing"];
+      optkey   = ["Short";"模块";"Printing"];
       optread  = (fun () -> !short) ;
       optwrite = ((:=) short) }
   
@@ -270,7 +270,7 @@ let nametab_register_modparam mbid mtb =
 let print_body is_impl extent env mp (l,body) =
   let name = Label.print l in
   hov 2 (match body with
-    | SFBmodule _ -> keyword "包裹" ++ spc () ++ name
+    | SFBmodule _ -> keyword "模块" ++ spc () ++ name
     | SFBmodtype _ -> keyword "Module Type" ++ spc () ++ name
     | SFBconst cb ->
        let ctx = Declareops.constant_polymorphic_context cb in
@@ -347,7 +347,7 @@ let rec print_typ_expr extent env mp locals mty =
             spc() ++ str ":="++ spc() ++ print_modpath locals mp'
         | OnlyNames -> mt () in
       hov 2 (print_typ_expr extent env mp locals me ++ spc() ++ str "with" ++ spc() ++
-             keyword "包裹"++ spc() ++ str s ++ body)
+             keyword "模块"++ spc() ++ str s ++ body)
 
 let print_mod_expr env mp locals = function
   | MEident mp -> print_modpath locals mp
@@ -421,7 +421,7 @@ let unsafe_print_module extent env mp with_body mb =
     | _, Some ty -> brk (1,1) ++ str": " ++ print_expression' true extent env mp ty
     | _, _ -> brk (1,1) ++ str": " ++ print_signature' true extent env mp mb.mod_type
   in
-  hv 0 (keyword "包裹" ++ spc () ++ name ++ modtype ++ body)
+  hv 0 (keyword "模块" ++ spc () ++ name ++ modtype ++ body)
 
 exception ShortPrinting
 

@@ -15,7 +15,7 @@ https://www.bilibili.com/video/av45005443
 
 From Qoc Require Import Jisuanji .
 
-包裹 ABC一二三 .
+模块 ABC一二三 .
 
   归纳的 haha := .
 

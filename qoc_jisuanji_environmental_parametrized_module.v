@@ -14,7 +14,7 @@ From Qoc Require Import Jisuanji .
 
 (** PART 1 : SIMPLE PARAMETRIZATION *)
 
-包裹 p_dl.
+模块 p_dl.
 (** Bāoguǒ p_dl.  *)
 
   参数 p : 类型 .
@@ -36,17 +36,17 @@ From Qoc Require Import Jisuanji .
 结束 p_dl.
 (** Jiéshù p_dl. *)
 
-包裹 词头了 参数 nat_dl : p_dl 跟 定义 p := nat.
+模块 词头了 参数 nat_dl : p_dl 跟 定义 p := nat.
 (** Bāoguǒ cítóule cānshù nat_dl: P_dl gēn dìngyì p:= Nat. *)
 打印 nat_dl.l.
 (** Dǎyìn nat_dl.L. *)
 计算 (nat_dl.l 3).
 (** Jìsuàn (nat_dl.L 3). *)
-包裹 词头了 参数 bool_dl : 让 定义 p := bool 在 p_dl .
+模块 词头了 参数 bool_dl : 让 定义 p := bool 在 p_dl .
 (** Bāoguǒ cítóule cānshù bool_dl: Ràng dìngyì p:= Bool zài p_dl. *)
 计算 (bool_dl.l false).
 (** Jìsuàn (bool_dl.L false). *)
-包裹 词头了 别号 NN := nat_dl .
+模块 词头了 别号 NN := nat_dl .
 (** Bāoguǒ cítóule bié hào NN:= Nat_dl. *)
 打印 NN.l.
 (** Dǎyìn NN.L. *)
@@ -116,7 +116,7 @@ Reset p_dl .
 
 
 (** Module without parameters . This is precisely for the prefix [M] below .*)
-包裹 MOD_T'nat_x'0_y'true.
+模块 MOD_T'nat_x'0_y'true.
 
   定义 T := nat.
 
@@ -129,10 +129,10 @@ Reset p_dl .
 
 结束 MOD_T'nat_x'0_y'true.
 
-包裹 词头了 参数 M : MOD_T'nat_x'0_y'true .
+模块 词头了 参数 M : MOD_T'nat_x'0_y'true .
 
 (** Module with 2 inner-parameters and with some environment which is enabled . *)
-包裹 MOD_T_x.
+模块 MOD_T_x.
 
   参数 T : Set.
 
@@ -148,21 +148,21 @@ Reset p_dl .
 结束 MOD_T_x.
 
 (** Module instantiated and prefixed by the name [B] . *)
-包裹 词头了 参数 B : (MOD_T_x 跟 定义 T := bool).
+模块 词头了 参数 B : (MOD_T_x 跟 定义 T := bool).
 (** Another different instantiation . Module instantiated and prefixed by the name [N] . *)
-包裹 词头了 参数 N : (MOD_T_x 跟 定义 T := nat) .
+模块 词头了 参数 N : (MOD_T_x 跟 定义 T := nat) .
 打印 N.T.
 打印 N.x.
 
 (** No more instantiation of [M] is possible. Oneself can only alias (here rename) , then check the precision . *)
-包裹 词头了 别号 M' <: (MOD_T_x 跟 定义 T := nat) := M .
+模块 词头了 别号 M' <: (MOD_T_x 跟 定义 T := nat) := M .
 
-包裹 MOD_z (M'' : MOD_T'nat_x'0_y'true).
+模块 MOD_z (M'' : MOD_T'nat_x'0_y'true).
    定义 z : nat := 1 + M''.x .
 结束 MOD_z.
 
 (** Another form of the command to (anonymously) present the module components and to prefix the module at the same time (and also to check the precision). *)
-包裹 词头了 别号 M_z <: (MOD_T_x 跟 定义 T := nat).
+模块 词头了 别号 M_z <: (MOD_T_x 跟 定义 T := nat).
    包括 M.
    Fail 定义 x :=  1 .
 
@@ -180,9 +180,9 @@ Reset p_dl .
 打印 M_z.x.
 
 (** Module with one outer-parameter [X]] . This module has also one inner-parameter [Y] , which will also be component of the result  *)
-包裹 MODPARAMS (X : MOD_T_x) <: MOD_T_x .
+模块 MODPARAMS (X : MOD_T_x) <: MOD_T_x .
 
-  包裹 词头了 参数 Y : (MOD_T_x 跟 定义 T := X.T) .
+  模块 词头了 参数 Y : (MOD_T_x 跟 定义 T := X.T) .
 
   打印 X.x.
   打印 Y.x.
@@ -218,42 +218,42 @@ Reset p_dl .
 
 结束 MODPARAMS.
 
-打印 包裹 MODPARAMS.
+打印 模块 MODPARAMS.
 
 (** Fails because the sharing constraints are not satisfied *)
-Fail 包裹 词头了 参数 P : ((MODPARAMS N) 跟 包裹 词头了 Y := B) .
-Fail 包裹 词头了 参数 P : ((MODPARAMS B) 跟 包裹 词头了 Y := N) .
+Fail 模块 词头了 参数 P : ((MODPARAMS N) 跟 模块 词头了 Y := B) .
+Fail 模块 词头了 参数 P : ((MODPARAMS B) 跟 模块 词头了 Y := N) .
 
 (** In this section :  [X = M , Y = N] *)
 
-包裹 词头了 参数 R : ((MODPARAMS M) 跟 包裹 词头了 Y := N) .
-打印 包裹 词头了 R .
+模块 词头了 参数 R : ((MODPARAMS M) 跟 模块 词头了 Y := N) .
+打印 模块 词头了 R .
 打印 R.x. (** M.x is unfolded in ( R.x = ( 0 (** M.x *) , R.Y.x) ) because the component x of MOD_T_x is inlined ;
 and certainly R.Y.x ( = N.x ) will not be unfolded because Y is some inner (not-outer) parameter of MODPARAMS *)
 计算 ( fst R.x + snd R.x ).
 
-包裹 词头了 参数 S : (** HERE !!! *) ! ( (MODPARAMS M) 跟 包裹 词头了 Y := N ) .
+模块 词头了 参数 S : (** HERE !!! *) ! ( (MODPARAMS M) 跟 模块 词头了 Y := N ) .
 (** [M.x]] is not unfolded in [ R.x = (M.x , S.Y.x) ] because the inlining of the component [x] of [MOD_T_x] is disabled by the command [!] *)
 打印 S.x. 
 计算 ( fst S.x + snd S.x ).
 
 (** In this section : [X = N , Y = M] *)
 
-包裹 词头了 参数 U : ((MODPARAMS N) 跟 包裹 词头了 Y := M) .
+模块 词头了 参数 U : ((MODPARAMS N) 跟 模块 词头了 Y := M) .
 (** In [ U.x = (N.x , U.Y.x) ] , certainly  [N.x] is already not unfoldable *)
 打印 U.x .
 计算 ( snd U.x + fst U.x ) .
 
 (** This section shows how the inner-parameter [Y] of the module [MODPARAMS] may be moved outside as some outer-parameter .
  Also the permutation of the sequence of the outer-parameters is possible . *)
-包裹 MODPARAMS_Y_X (Y : MOD_T_x) (X : MOD_T_x 跟 定义 T := Y.T)
-  := 让 包裹 词头了 Y := Y 在 (MODPARAMS X) .
-打印 包裹 MODPARAMS_Y_X.
-包裹 词头了 参数 V_Y'M_X'N : (MODPARAMS_Y_X M N) .
+模块 MODPARAMS_Y_X (Y : MOD_T_x) (X : MOD_T_x 跟 定义 T := Y.T)
+  := 让 模块 词头了 Y := Y 在 (MODPARAMS X) .
+打印 模块 MODPARAMS_Y_X.
+模块 词头了 参数 V_Y'M_X'N : (MODPARAMS_Y_X M N) .
 Reset V_Y'M_X'N . (** same : *)
-包裹 词头了 参数 V_Y_X (Y : MOD_T_x) (X : (MOD_T_x 跟 定义 T := Y.T))
+模块 词头了 参数 V_Y_X (Y : MOD_T_x) (X : (MOD_T_x 跟 定义 T := Y.T))
   : (MODPARAMS_Y_X Y X) .
-包裹 词头了 别号 V_Y'M_X'N <: (MODPARAMS_Y_X M N) := (V_Y_X M N) .
+模块 词头了 别号 V_Y'M_X'N <: (MODPARAMS_Y_X M N) := (V_Y_X M N) .
 (** [V_Y'M_X'N.Y.x] is unfolded in [ V_Y'M_X'N.x = (N.x , 0 (* V_Y'M_X'N.Y.x *) ) ] , 
   because the component [x] of [MOD_T_x] is inlined 
     and the instantiation by [M] of the module [MODPARAMS_Y_X] or the prefixed-module [V_Y_X] to get the instance [V_Y'M_X'N] 

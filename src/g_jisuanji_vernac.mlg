@@ -569,7 +569,7 @@ GRAMMAR EXTEND Gram
 	bl = LIST0 module_binder; sign = of_module_type;
 	body = is_module_expr ->
 	  { VernacDefineModule (export, id, bl, sign, body) }
-      | "包裹" (* "包裹" "baoguo" ; OLD: "Module" *) ;
+      | "模块" (* "模块" "baoguo" ; OLD: "Module" *) ;
       	"词头了" (* "词头了" "citoule" ; OLD: "Prefixed" *) ; export = export_token; id = identref;
 	bl = LIST0 module_binder; sign = of_module_type;
 	body = is_module_expr ->
@@ -578,7 +578,7 @@ GRAMMAR EXTEND Gram
 	bl = LIST0 module_binder; sign = of_module_type_check;
 	body = is_module_expr ->
 	  { VernacDefineModule (export, id, bl, sign, body) }
-      | "包裹" (* "包裹" "baoguo" ; OLD: "Module" *);
+      | "模块" (* "模块" "baoguo" ; OLD: "Module" *);
       	"词头了" (* "词头了" "citoule" ; OLD: "Prefixed" *);
 	"别号" (* "别号" "biehao" ; OLD : "Alias" *) ; export = export_token; id = identref;
 	bl = LIST0 module_binder; sign = of_module_type_check;
@@ -592,7 +592,7 @@ GRAMMAR EXTEND Gram
 	bl = LIST0 module_binder; sign = check_module_types;
 	body = is_module_type ->
 	  { VernacDeclareModuleType (id, bl, sign, body) }
-      | "包裹" (* "包裹" "baoguo" ; OLD: "Module Type" *) ; id = identref;
+      | "模块" (* "模块" "baoguo" ; OLD: "Module Type" *) ; id = identref;
 	bl = LIST0 module_binder; sign = check_module_types;
 	body = is_module_type ->
 	  { VernacDeclareModuleType (id, bl, sign, body) }
@@ -602,7 +602,7 @@ GRAMMAR EXTEND Gram
       | IDENT "Modular" ; "Prefixed"; "Parameter" ; export = export_token; id = identref;
 	bl = LIST0 module_binder; ":"; mty = module_type_inl ->
 	  { VernacDeclareModule (export, id, bl, mty) }
-      | "包裹" (* "包裹" "baoguo" ; OLD: "Module" *);
+      | "模块" (* "模块" "baoguo" ; OLD: "Module" *);
         "词头了" (* "词头了" "citoule" ; OLD: "Prefixed" *);
 	"参数" (* "参数" "canshu" ; OLD: "Parameter" *) ; export = export_token; id = identref;
 	bl = LIST0 module_binder; ":"; mty = module_type_inl ->
@@ -715,7 +715,7 @@ GRAMMAR EXTEND Gram
 	  { CWith_Module (fqid,qid) }
        | IDENT "Modular"; "Prefixed" ; fqid = fullyqualid; ":="; qid = qualid ->
 	  { CWith_Module (fqid,qid) }
-       | "包裹" (* "包裹" "baoguo" ; OLD: "Module" *) ;
+       | "模块" (* "模块" "baoguo" ; OLD: "Module" *) ;
        	 "词头了" (* "词头了" "citoule" ; OLD: "Prefixed" *) ; fqid = fullyqualid; ":="; qid = qualid ->
 	  { CWith_Module (fqid,qid) }
       ] ]
@@ -1049,13 +1049,13 @@ GRAMMAR EXTEND Gram
 	  { VernacPrint (PrintModuleType qid) }
       | IDENT "Print"; IDENT "Modular"; qid = global ->
 	  { VernacPrint (PrintModuleType qid) }
-      | IDENT "打印" (* "打印" "dayin" ; OLD: "Print" *); IDENT "包裹" (* "包裹" "baoguo" ; OLD: "Modular" *); qid = global ->
+      | IDENT "打印" (* "打印" "dayin" ; OLD: "Print" *); IDENT "模块" (* "模块" "baoguo" ; OLD: "Modular" *); qid = global ->
 	  { VernacPrint (PrintModuleType qid) }
       | IDENT "Print"; IDENT "Module"; qid = global ->
 	  { VernacPrint (PrintModule qid) }
       | IDENT "Print" ; IDENT "Modular" ; IDENT "Prefixed" ; qid = global ->
 	  { VernacPrint (PrintModule qid) }
-      | IDENT "打印" (* "打印" "dayin" ; OLD: "Print" *); IDENT "包裹" (* "包裹" "baoguo" ; OLD: "Modular" *);
+      | IDENT "打印" (* "打印" "dayin" ; OLD: "Print" *); IDENT "模块" (* "模块" "baoguo" ; OLD: "Modular" *);
         IDENT "词头了" (* "词头了" "citoule" ; OLD: "Prefixed" *) ; qid = global ->
 	  { VernacPrint (PrintModule qid) }
       | IDENT "Print"; IDENT "Namespace" ; ns = dirpath ->

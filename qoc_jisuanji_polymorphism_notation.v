@@ -23,7 +23,7 @@ From Qoc Require Import Jisuanji .
 
 *)
 
-包裹 多态_归纳的_隐含_符号 .
+模块 多态_归纳的_隐含_符号 .
 (** Bāoguǒ duō tài_guīnà de_yǐn hán_fúhào. *)
 
 归纳的 序列'多态 (数据 : 类型) : 类型 := 
