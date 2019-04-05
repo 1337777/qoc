@@ -22,6 +22,7 @@ open Locality
 open Attributes
 open Vernacentries
 
+(**TODO: ERASE . not necessary because it is possible to hardcode into the grammar
 let () =
   declare_bool_option
     { optdepr  = false;
@@ -29,3 +30,4 @@ let () =
       optkey   = ["隐含" (* "隐含" "hanxu" ; OLD : "Implicit" *) ;"键入" (* "键入" "jianru" ; OLD : "Arguments" *)];
       optread  = Impargs.is_implicit_args;
       optwrite = Impargs.make_implicit_args }
+  *)

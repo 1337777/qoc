@@ -1710,6 +1710,7 @@ let get_table key =
 diff in coq/library/goptions.mli :
 val get_table : option_name -> option_state
 *)
+(*TODO: ERASE . not necessary because it is possible to hardcode into the grammar
 let () =
   Goptions.(declare_bool_option
     { optname  = "ssreflect identifiers";
@@ -1717,10 +1718,11 @@ let () =
       optdepr  = false;
       optread  = (fun _ ->
      	       match (Goptions.get_table ["SsrIdents"]).opt_value with
-	       	     BoolValue v -> v | _ -> anomaly ("async_option.") )
+	       	     BoolValue v -> v | _ -> CErrors.anomaly (str "async_option.") )
       (* (fun _ -> (* let table =  (Goptions.get_tables ()) in *) !ssr_reserved_ids) *) ;
       optwrite = (fun b -> Goptions.set_bool_option_value ["SsrIdents"] b) (* (fun b -> ssr_reserved_ids := b) *)
     })
+*)
 
 let is_ssr_reserved s =
   let n = String.length s in n > 2 && s.[0] = '_' && s.[n - 1] = '_'

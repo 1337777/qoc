@@ -1079,6 +1079,8 @@ GRAMMAR EXTEND Gram
 
       | IDENT "Print"; IDENT "Table"; table = option_table ->
 	  { VernacPrintOption table }
+      |  IDENT "打印" (* "打印" "dayin" ; OLD: "Printing" *) ; IDENT "表格" (* "表格" "biaoge" ; OLD: "Table" *); table = option_table ->
+	  { VernacPrintOption table }
 
       | IDENT "Add"; table = IDENT; field = IDENT; v = LIST1 option_ref_value
         -> { VernacAddOption ([table;field], v) }
@@ -1088,6 +1090,8 @@ GRAMMAR EXTEND Gram
       (* (but they are unused anyway) *)
       | IDENT "Add"; table = IDENT; v = LIST1 option_ref_value ->
           { VernacAddOption ([table], v) }
+      | IDENT "加"; IDENT "打印" (* "打印" "dayin" ; OLD: "Print" *) ; IDENT "让" (* "让" "rang" ; OLD : "Let" *); v = LIST1 option_ref_value
+        -> { VernacAddOption (["Printing";"Let"], v) }
 
       | IDENT "Test"; table = option_table; "for"; v = LIST1 option_ref_value
         -> { VernacMemOption (table, v) }
@@ -1204,7 +1208,10 @@ GRAMMAR EXTEND Gram
       | s  = STRING   -> { StringRefValue s } ] ]
   ;
   option_table:
-    [ [ fl = LIST1 [ x = IDENT -> { x } ] -> { fl } ]]
+    [ [ fl = LIST1 [ x = IDENT -> { x } ] -> { fl }
+       | IDENT "隐含" (* "隐含" "hanxu" ; OLD : "Implicit" *) ; IDENT "键入" (* "键入" "jianru" ; OLD : "Arguments" *) -> { [ "Implicit" ; "Arguments" ] }
+       | IDENT "打印" (* "打印" "dayin" ; OLD: "Printing" *) ; IDENT "符号" (* "符号" "fuhao" ; OLD: "Notations" *) -> { [ "Printing" ; "Notations" ] }
+       | IDENT "Ssr识别号" (* "Ssr识别号" "shibie hao" ; OLD: "SsrIdents" *) -> { [ "SsrIdents" ] } ]]
   ;
   as_dirpath:
     [ [ d = OPT [ "as"; d = dirpath -> { d } ] -> { d } ] ]
