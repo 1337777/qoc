@@ -215,7 +215,8 @@ Proof .
   
 Abort.
 
-Lemma tactics_abstract (n m : nat) : True.
+(**TODO: solve this *)
+(*Lemma tactics_abstract (n m : nat) : True.
 
   have [:Sm] @plus_n_Sm : nat .
   { apply: (plus n).
@@ -237,7 +238,7 @@ Lemma tactics_abstract (n m : nat) : True.
     }
   }
 
-Abort.
+Abort.*)
 
 Definition tactics_rewrite : forall n m : nat , n = m -> m = n .
 Proof .

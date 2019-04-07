@@ -20,6 +20,7 @@ src/jisuanji_extratactics.mlg
 src/g_jisuanji_proofs.mlg
 src/g_jisuanji_vernac.mlg
 src/jisuanji_ssrparser.mlg
+src/jisuanji_g_ltac.mlg
 src/g_jisuanji.mlg
 src/jisuanji_vernacentries.ml
 src/jisuanji_plugin.mlpack

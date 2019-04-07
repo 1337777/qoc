@@ -1665,36 +1665,6 @@ let old_tac = V82.tactic
 
 let ssr_reserved_ids = Summary.ref ~name:"jisuanji_SSR:idents" true
 
-(* let export_option_value key = function
-  | Goptions.BoolValue b   -> b
-  | Goptions.IntValue x    -> Goptions.error_undeclared_key key
-  | Goptions.StringValue s -> Goptions.error_undeclared_key key
-  | Goptions.StringOptValue s -> Goptions.error_undeclared_key key
-*)
-
-(*let interruptible f x =
-    catch_break := true;
-    Control.check_for_interrupt ();
-    let r = f x in
-    catch_break := false;
-    r
-*)
-(*
-let get_options key () =
-try
-  let table = ref Goptions.OptionMap.empty in
-  table := (Goptions.get_tables ()) ;
-  let state = Goptions.OptionMap.find_opt key !table in
-  table := Goptions.OptionMap.empty ;
-    ( match state with
-     (Some {Goptions.opt_value = v ; _ }) -> export_option_value key v
-     | None -> false )
-with any -> false *)
-(*
-let get_options key () =
-  export_option_value key (Goptions.get_table key)
-*)			     
-
 (**TODO: jisuanji_  should same option *)
 (**TODO:
 
