@@ -299,6 +299,7 @@ END
 
 TACTIC EXTEND admit
 |[ "admit" ] -> { Proofview.give_up }
+|[ "承认" (* "承认" "chengreng" ; OLD: "admit" *) ] -> { Proofview.give_up }
 END
 
 (* Fix *)

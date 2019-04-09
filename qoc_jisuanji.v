@@ -80,3 +80,6 @@ Require qoc_jisuanji_tactics .
 
 *)
 Require qoc_jisuanji_environmental_parametrized_module .
+
+Require qoc_jisuanji_tactical .
+

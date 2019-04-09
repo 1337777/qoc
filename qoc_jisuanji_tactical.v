@@ -1,84 +1,92 @@
 From Qoc Require Import Jisuanji .
 
-Goal forall n : nat + nat , forall b : bool + bool , pair n  b = pair n  b.
+(** 
+
+短 :: 一个命令/策略“A”可以对目标/问题起作用并产生许多新的较小的子目标。然后，许多“替代”命令中的一些命令“D”可以在这些子目标中的一个附近“序列”。但是这个“序列”子目标是哪个，这是“替代”命令？
+
+Short :: one command/tactic "A" may act on a goal/problem and generate many new smaller subgoals . Then some command "D" among many "alternative" commands may be in "sequence" near one of these subgoals . But which is this "sequence" subgoal and which is this "alternative" command ?
+
+ Example :  "A ; sequence [> ( alternative ( B1 => C | B2 => D ) ) & E ]"
+
+Outline ::
+* PART1 : SEQUENCING TACTICS
+* PART2 : ALTERNATING TACTICS  *)
+
+(** PART1 : SEQUENCING TACTICS *)
+
+Goal forall n : nat + nat , forall b : bool + bool , ( n = n /\ b = b ) .
   intros n b.
-  destruct n; swap 1 2 . Undo.
-  Fail (destruct n; destruct b); [ | ] . Undo.
+  解构 n. Undo.
+  解构 n  ; 解构 b . Undo .
 
-  destruct n; (destruct b;$ inner [ | ]) . Undo.
-  destruct n; (destruct b; [ | ]) . Undo.
-  (* BUG : refman says:  _ ; [ _ ] should precedes _ ; _ *)
-  Fail destruct n; destruct b; [ | ] .
+  解构 n; ( 解构 b ;
+                [> idtac | idtac | idtac | idtac ] ) . Undo.
+  解构 n; ( inner: 解构 b ;
+               [> idtac | idtac ] ) . Undo.
+  解构 n; inner: 解构 b ;
+                       [> idtac | idtac ]  . Undo.
+  解构 n; ( 解构 b;
+                [ idtac | idtac ] ) . Undo.
 
-
-  destruct n; (destruct b; [ | ]) . Undo.
-  Fail destruct n; (destruct b; [> | ]) . Undo.
-  Fail destruct n; (destruct b;$ outer [ | ]) . Undo.
+  (** nei *)
+  解构 n; ( 内: 解构 b ;
+               [> idtac | idtac ] ) . Undo.
   
 Abort .
 
+Goal forall B C D : Prop, (False /\ B) /\ (C /\ D).
+  split; split. Undo.
+  做 2 split. Undo.
+  重复 split. Undo.
+  进展 重复 split.
+  1 : {
+    失败 进展 重复 split.
+    尝试 进展 重复 split.
+    承认.
+  }
+
+Abort.
 
 
 
 
+(** --------------------------------------------------- *)
 
 
 
 
-
-
-
-
-
-
-
-
-(*
-
-Goal forall n : nat + nat , forall b : bool + bool , (n , b) = (n , b).
+Goal forall n : nat + nat , forall b : bool + bool , ( n = n /\ b = b ) .
   intros n b.
-  destruct n; only 2: destruct b. Undo.
-  destruct n; only 2: [>  ] .
-  1,2: destruct b.
-  Restart. intros n b.
-  destruct n; destruct b; only 2-4 : swap 1 2.
-  Fail !: reflexivity.
-  2 : { !: reflexivity. }
-  repeat idtac. Fail progress idtac.
-  all: destruct n; destruct b; reflexivity. Undo.
-  par: destruct n; destruct b; reflexivity.
-  all: reflexivity.
-  par: reflexivity.
+  destruct n. Undo.
+  destruct n  ; destruct b . Undo .
+
+  destruct n; ( destruct b ;
+                [> idtac | idtac | idtac | idtac ] ) . Undo.
+  destruct n; ( inner: destruct b ;
+               [> idtac | idtac ] ) . Undo.
+  destruct n; inner: destruct b ;
+                       [> idtac | idtac ]  . Undo.
+  destruct n; ( destruct b;
+                [ idtac | idtac ] ) . Undo.
+
+  (** nei *)
+  destruct n; ( 内: destruct b ;
+               [> idtac | idtac ] ) . Undo.
   
 Abort .
-*)
-Ltac time_constr1 tac :=
-  let eval_early := match goal with _ => restart_timer "(depth 1)" end in
-  let ret := tac () in
-  let eval_early := match goal with _ => finish_timing ( "Tactic evaluation" ) "(depth 1)" end in
-  ret.
 
-Goal True.
-let v := time_constr
-       ltac:(fun _ =>
-               let x := time_constr1 ltac:(fun _ => (constr: ( 10 - 3))) in
-               let y := time_constr1 ltac:(fun _ => eval compute in x) in
-               ( constr : (  y  ) ) ) in
-  pose v.
-Abort.
-
-Goal  True.
-
-  let t  m := match m with
-             (fun k => ( 3 + ?j ))  => let p := constr:(fun k : nat => 9 + j) in idtac p
-           end in
-  t  (fun n => 3 + (n + 2)) .
-  
-  let t  m := match m with
-                (fun k => ( 3 + @?j k ))  => let p :=  constr:(fun c : nat => 9 + j c)  in
-                                          let q :=  eval hnf in p in
-  idtac p "------" q
-           end in
-  t  (fun n => 3 + (n + 2)) .
+Goal forall B C D : Prop, (False /\ B) /\ (C /\ D).
+  split; split. Undo.
+  do 2 split. Undo.
+  repeat split. Undo.
+  progress repeat split.
+  1 : {
+    Fail progress repeat split.
+    try progress repeat split.
+    admit.
+  }
 
 Abort.
+
+
+(** PART2 : ALTERNATING TACTICS  *)
