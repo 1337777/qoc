@@ -130,9 +130,9 @@ Goal forall n : nat + nat , forall b : bool + bool , ( n = n /\ b = b ) .
 
   Fail outer alts [ fail | idtac "a" | idtac "b"  ]; idtac "c"; fail .
   (* a c b c *)
-  Fail alts [ fail | idtac "a" | idtac "b"  ]; idtac "c"; fail .
+  Fail no_outer (outer alts [ fail | idtac "a" | idtac "b"  ]); idtac "c"; fail .
   (* a c *)
-  Fail no_outer (outer alts [ idtac "a" | idtac "b"  ]); idtac "c"; fail .
+  Fail alts [ fail | idtac "a" | idtac "b"  ]; idtac "c"; fail .
   (* a c *)
 
   Fail (          outer inner alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
