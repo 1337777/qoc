@@ -99,17 +99,17 @@ GRAMMAR EXTEND Gram
           operconstr  ;
 
   tactic_then_last:
-    [ [ "|"; lta = LIST0 (OPT tactic_expr) SEP "|" ->
+    [ [ "&"; lta = LIST0 (OPT tactic_expr) SEP "&" ->
         { Array.map (function None -> TacId [] | Some t -> t) (Array.of_list lta) }
       | -> { [||] }
     ] ]
   ;
   tactic_then_gen:
-    [ [ ta = tactic_expr; "|"; tg = tactic_then_gen -> { let (first,last) = tg in (ta::first, last) }
+    [ [ ta = tactic_expr; "&"; tg = tactic_then_gen -> { let (first,last) = tg in (ta::first, last) }
       | ta = tactic_expr; ".."; l = tactic_then_last -> { ([], Some (ta, l)) }
       | ".."; l = tactic_then_last -> { ([], Some (TacId [], l)) }
       | ta = tactic_expr -> { ([ta], None) }
-      | "|"; tg = tactic_then_gen -> { let (first,last) = tg in (TacId [] :: first, last) }
+      | "&"; tg = tactic_then_gen -> { let (first,last) = tg in (TacId [] :: first, last) }
       | -> { ([TacId []], None) }
     ] ]
   ;
@@ -186,6 +186,7 @@ GRAMMAR EXTEND Gram
 	  { TacFirst l }
       | IDENT "solve" ; "["; l = LIST0 tactic_expr SEP "|"; "]" ->
 	  { TacSolve l }
+      | IDENT "idtac"; l = LIST0 message_token -> { TacId l }
       | IDENT "idtac"; l = LIST0 message_token -> { TacId l }
       | g=failkw; n = [ n = int_or_var -> { n } | -> { fail_default_value } ];
 	  l = LIST0 message_token -> { TacFail (g,n,l) }
