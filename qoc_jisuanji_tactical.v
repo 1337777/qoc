@@ -120,3 +120,48 @@ Abort.
 
 
 (** PART2 : ALTERNATING TACTICS  *)
+
+Goal forall n : nat + nat , forall b : bool + bool , ( n = n /\ b = b ) .
+  intros.
+  Fail outer alts [ ] .
+  outer alts [fail | idtac].
+  Fail alts [ ] .
+  alts [fail | idtac].
+
+  Fail outer alts [ fail | idtac "a" | idtac "b"  ]; idtac "c"; fail .
+  (* a c b c *)
+  Fail alts [ fail | idtac "a" | idtac "b"  ]; idtac "c"; fail .
+  (* a c *)
+  Fail no_outer (outer alts [ idtac "a" | idtac "b"  ]); idtac "c"; fail .
+  (* a c *)
+
+  Fail (          outer inner alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
+                           else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (*  a b b' i o i' o *)
+  Fail (                inner alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
+                          else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b b' i o *)
+  Fail ( no_outer outer inner alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
+                           else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b b' i o *)
+  Fail (          outer       alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
+                          else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b b' *)
+  Fail (no_outer  outer       alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
+                          else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b b' *)
+  Fail (                      alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
+                          else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b b' *)
+
+  Fail (          outer       alter idtac "a" then outer alts [idtac "b" | idtac "b'"]
+                          else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b o b' o *)
+  Fail (no_outer  outer       alter idtac "a" then outer alts [idtac "b" | idtac "b'"]
+                          else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b o *)
+  Fail (                      alter idtac "a" then outer alts [idtac "b" | idtac "b'"]
+                          else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b o *)
+
+Abort.

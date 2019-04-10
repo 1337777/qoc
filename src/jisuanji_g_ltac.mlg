@@ -148,9 +148,9 @@ GRAMMAR EXTEND Gram
       | IDENT "progress"; ta = tactic_expr -> { TacProgress ta }
       | IDENT "进展" (* "进展" "jinzhan" ; OLD: "progress" *); ta = tactic_expr -> { TacProgress ta }
       | IDENT "once"; ta = tactic_expr -> { TacOnce ta }
-      | IDENT "一次" (* "一次" "yici" ; OLD: "once" *); ta = tactic_expr -> { TacOnce ta }
+      | IDENT "no_outer"; ta = tactic_expr -> { TacOnce ta }
+      | IDENT "无外" (* "无外" "wu wai" ; OLD: "once" *); ta = tactic_expr -> { TacOnce ta }
       | IDENT "exactly_once"; ta = tactic_expr -> { TacExactlyOnce ta }
-      | IDENT "exactly_once" (* OLD: "exactly_once" *); ta = tactic_expr -> { TacExactlyOnce ta }
       | IDENT "info"; ta = tactic_expr -> { TacShowHyps ta }
       | IDENT "信息" (* "信息" "xinxi" ; OLD: "info" *); ta = tactic_expr -> { TacShowHyps ta }
 (*To do: put Abstract in Refiner*)
@@ -168,6 +168,21 @@ GRAMMAR EXTEND Gram
     [ RIGHTA
       [ ta0 = tactic_expr; "+"; ta1 = binder_tactic -> { TacOr (ta0,ta1) }
       | ta0 = tactic_expr; "+"; ta1 = tactic_expr -> { TacOr (ta0,ta1) }
+      | IDENT "outer" ; IDENT "alts" ;  "["; l = LIST0 tactic_expr SEP "|"; "]" ->
+        { List.fold_right (fun ta acc -> TacOr (ta,acc)) l
+      	      	(TacFail ( TacLocal , fail_default_value , [] )) }
+      | IDENT "outer" ; IDENT "inner" ; IDENT "alter" ; ta = tactic_expr ;
+              "then" ; tat = tactic_expr ;
+              "else" ; tae = tactic_expr -> { TacOr( TacThen(ta,tat) , tae) }
+      | IDENT "inner" ; IDENT "alter" ; ta = tactic_expr ;
+              "then" ; tat = tactic_expr ;
+              "else" ; tae = tactic_expr -> { TacOnce (TacOr( TacThen(ta,tat) , tae)) }
+      | IDENT "outer" ; IDENT "alter" ; ta = tactic_expr ;
+              "then" ; tat = tactic_expr ;
+              "else" ; tae = tactic_expr -> { TacIfThenCatch(ta,tat,tae) }
+      | IDENT "alter" ; ta = tactic_expr ;
+              "then" ; tat = tactic_expr ;
+              "else" ; tae = tactic_expr -> { TacOnce (TacIfThenCatch(ta,tat,tae)) }
       | IDENT "tryif" ; ta = tactic_expr ;
               "then" ; tat = tactic_expr ;
               "else" ; tae = tactic_expr -> { TacIfThenCatch(ta,tat,tae) }
@@ -182,6 +197,13 @@ GRAMMAR EXTEND Gram
           { TacMatchGoal (b,true,mrl) }
       |	b = match_key; c = tactic_expr; "with"; mrl = match_list; "end" ->
           { TacMatch (b,c,mrl) }
+      | IDENT "alts" (* first *) ;  "["; l = LIST0  tactic_expr SEP "|"; "]" ->
+        { TacOnce (List.fold_right (fun ta acc -> TacOr (ta,acc)) l
+      	      	(TacFail ( TacLocal , fail_default_value , [] ))) }
+(*      | IDENT "alts" (* first *) ;  "["; l = LIST0 (OPT tactic_expr) SEP "|"; "]" ->
+        { TacOnce (List.fold_right (fun ta acc -> match ta with None ->
+	  		  TacOr ( TacId [] , acc) | Some ta -> TacOr (ta,acc) ) l
+      	      	(TacFail ( TacLocal , fail_default_value , [] ))) }*)
       | IDENT "first" ; "["; l = LIST0 tactic_expr SEP "|"; "]" ->
 	  { TacFirst l }
       | IDENT "solve" ; "["; l = LIST0 tactic_expr SEP "|"; "]" ->
@@ -197,8 +219,8 @@ GRAMMAR EXTEND Gram
   tactic_expr: LEVEL "0"
     [
       [
-       (*  "(" ; "inner" ; ":" ; ta = Pltac.tactic_expr ; ")" -> { TacExtendTac (Array.of_list [], ta, [| |] )  } 
-      | *)  "("; a = tactic_expr; ")" -> { a }
+       (*  "(" ; "inner" ; ":" ; ta = Pltac.tactic_expr ; ")" -> { TacExtendTac (Array.of_list [], ta, [| |] )  }  | *)
+       "("; a = tactic_expr; ")" -> { a }
       | "["; ">"; tg = tactic_then_gen; "]" -> {
           let (tf,tail) = tg in
           begin match tail with
