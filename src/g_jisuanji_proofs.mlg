@@ -63,7 +63,9 @@ GRAMMAR EXTEND Gram
   command:
     [ [ IDENT "Goal"; c = lconstr ->
         { VernacDefinition (Decl_kinds.(NoDischarge, Definition), ((CAst.make ~loc Names.Anonymous), None), ProveBody ([], c)) }
-      | IDENT "证明" (* "证明" "zhenming" ; OLD: "Proof" *) -> { VernacProof (None,None) }
+	| IDENT "目的" (* "目的" "mudi" ; OLD: "Goal" *); c = lconstr ->
+        { VernacDefinition (Decl_kinds.(NoDischarge, Definition), ((CAst.make ~loc Names.Anonymous), None), ProveBody ([], c)) }
+	| IDENT "证明" (* "证明" "zhenming" ; OLD: "Proof" *) -> { VernacProof (None,None) }
       | IDENT "Proof" ; IDENT "Mode" ; mn = string -> { VernacProofMode mn }
       | IDENT "Proof"; c = lconstr -> { VernacExactProof c }
       | IDENT "Abort" -> { VernacAbort None }

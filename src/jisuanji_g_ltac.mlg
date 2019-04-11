@@ -193,11 +193,69 @@ GRAMMAR EXTEND Gram
               "then" ; tat = tactic_expr ;
               "else" ; tae = tactic_expr -> { TacOnce (TacIfThenCatch(ta,tat,tae)) }
 
+     | IDENT "外" ; IDENT "改变化" ;  "["; l = LIST0 tactic_expr SEP "|"; "]" ->
+      (** = _ + _ *)
+        { List.fold_right (fun ta acc -> TacOr (ta,acc)) l
+      	      	(TacFail ( TacLocal , fail_default_value , [] )) }
+      | IDENT "改变化" ;  "["; l = LIST0  tactic_expr SEP "|"; "]" ->
+        (** = first *)
+        { TacOnce (List.fold_right (fun ta acc -> TacOr (ta,acc)) l
+      	      	(TacFail ( TacLocal , fail_default_value , [] ))) }
+
+      | IDENT "外" ; IDENT "内" ; IDENT "改变" ; ta = tactic_expr ;
+              "则" ; tat = tactic_expr ;
+              "否则" ; tae = tactic_expr -> { TacOr( TacThen(ta,tat) , tae) }
+      | IDENT "内" ; IDENT "改变" ; ta = tactic_expr ;
+              "则" ; tat = tactic_expr ;
+              "否则" ; tae = tactic_expr -> { TacOnce (TacOr( TacThen(ta,tat) , tae)) }
+      | IDENT "外" ; IDENT "改变" ; ta = tactic_expr ;
+              "则" ; tat = tactic_expr ;
+              "否则" ; tae = tactic_expr ->
+	(** = tryif *)
+        { TacIfThenCatch(ta,tat,tae) }
+      | IDENT "改变" ; ta = tactic_expr ;
+              "则" ; tat = tactic_expr ;
+              "否则" ; tae = tactic_expr -> { TacOnce (TacIfThenCatch(ta,tat,tae)) }
+
       | IDENT "tryif" ; ta = tactic_expr ;
               "then" ; tat = tactic_expr ;
               "else" ; tae = tactic_expr -> { TacIfThenCatch(ta,tat,tae) }
       | ta0 = tactic_expr; "||"; ta1 = binder_tactic -> { TacOrelse (ta0,ta1) }
       | ta0 = tactic_expr; "||"; ta1 = tactic_expr -> { TacOrelse (ta0,ta1) }
+
+      | IDENT "外" ; IDENT "内" ; IDENT "统一"; IDENT "目的"; "与"; mrl = match_context_list; "结束" ->
+          { TacMatchGoal (General,false,mrl) }
+      | IDENT "外" ; IDENT "统一"; IDENT "目的"; "与"; mrl = match_context_list; "结束" ->
+          { TacMatchGoal (Select,false,mrl) }
+      | IDENT "内" ; IDENT "统一"; IDENT "目的"; "与"; mrl = match_context_list; "结束" ->
+      (** = match goal *)
+          { TacMatchGoal (Once,false,mrl) }
+      | IDENT "统一"; IDENT "目的"; "与"; mrl = match_context_list; "结束" ->
+          { TacOnce (TacMatchGoal (Select,false,mrl)) } 	  
+
+      | IDENT "外" ; IDENT "内" ; IDENT "统一"; IDENT "颠倒"; IDENT "目的"; "与";
+        mrl = match_context_list; "结束" ->
+          { TacMatchGoal (General,true,mrl) }
+      | IDENT "外" ; IDENT "统一"; IDENT "颠倒"; IDENT "目的"; "与";
+        mrl = match_context_list; "结束" ->
+          { TacMatchGoal (Select,true,mrl) }
+      | IDENT "内" ; IDENT "统一"; IDENT "颠倒"; IDENT "目的"; "与";
+        mrl = match_context_list; "结束" ->
+      (** = match reverse goal *)
+          { TacMatchGoal (Once,true,mrl) }
+      | IDENT "统一"; IDENT "颠倒"; IDENT "目的"; "与";
+        mrl = match_context_list; "结束" ->
+          { TacOnce (TacMatchGoal (Select,true,mrl)) }
+
+      |	IDENT "外" ; IDENT "内" ; IDENT "统一"; c = tactic_expr; "与"; mrl = match_list; "结束" ->
+          { TacMatch (General,c,mrl) }
+      |	IDENT "外" ; IDENT "统一"; c = tactic_expr; "与"; mrl = match_list; "结束" ->
+          { TacMatch (Select,c,mrl) }
+      |	IDENT "内" ; IDENT "统一"; c = tactic_expr; "与"; mrl = match_list; "结束" ->
+      (** = match _ *)
+          { TacMatch (Once,c,mrl) }
+      |	IDENT "统一"; c = tactic_expr; "与"; mrl = match_list; "结束" ->
+          { TacOnce (TacMatch (Select,c,mrl)) }
 
       | IDENT "outer" ; IDENT "inner" ; IDENT "unify"; IDENT "goal"; "with"; mrl = match_context_list; "end" ->
           { TacMatchGoal (General,false,mrl) }

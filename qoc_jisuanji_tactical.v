@@ -121,6 +121,225 @@ Abort.
 
 (** PART2 : ALTERNATIVES TACTIC  *)
 
+(** _ + _ *)  (** first [ _ ] *)  (** tryif _ 否则 _ 则 *)
+目的 True .
+  外 改变化 [fail | idtac "a" ]. (** = _ + _ *)
+  改变化 [fail | idtac "a" ]. (** = first [ _ ] *)
+
+  失败 外 改变化 [ ] .
+  失败 改变化 [ ] .
+
+  失败 外 改变化 [ fail | idtac "a" | idtac "b"  ]; idtac "c"; fail .
+  (* a c b c *)
+  失败 无外 (外 改变化 [ fail | idtac "a" | idtac "b"  ]); idtac "c"; fail .
+  (* a c *)
+  失败 改变化 [ fail | idtac "a" | idtac "b"  ]; idtac "c"; fail .
+  (* a c *)
+
+  外 内 改变 fail 则 idtac "a"
+                    否则 idtac "b" .
+  外 改变 fail 则 idtac "a"
+                    否则 idtac "b" . (** = tryif _ 否则 _ 则 *)
+  内 改变 fail 则 idtac "a"
+                    否则 idtac "b" .
+  改变 fail 则 idtac "a"
+                    否则 idtac "b" .
+
+
+  失败 (          外 内 改变 idtac "a" 则 外 改变化 [idtac "b" | idtac "b'"]; fail
+                           否则 外 改变化 [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (*  a b b' i o i' o *)
+  失败 (                内 改变 idtac "a" 则 外 改变化 [idtac "b" | idtac "b'"]; fail
+                          否则 外 改变化 [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b b' i o *)
+  失败 (无外 (外 内 改变 idtac "a" 则 外 改变化 [idtac "b" | idtac "b'"]; fail
+                           否则 外 改变化 [idtac "i" | idtac "i'"] )); idtac "o"; fail .
+  (* a b b' i o *)
+  失败 (          外       改变 idtac "a" 则 外 改变化 [idtac "b" | idtac "b'"]; fail
+                          否则 外 改变化 [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b b' *)
+  失败 (无外 (外       改变 idtac "a" 则 外 改变化 [idtac "b" | idtac "b'"]; fail
+                          否则 外 改变化 [idtac "i" | idtac "i'"] )); idtac "o"; fail .
+  (* a b b' *)
+  失败 (                      改变 idtac "a" 则 外 改变化 [idtac "b" | idtac "b'"]; fail
+                          否则 外 改变化 [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b b' *)
+
+  失败 (          外       改变 idtac "a" 则 外 改变化 [idtac "b" | idtac "b'"]
+                          否则 外 改变化 [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b o b' o *)
+  失败 (无外 (外       改变 idtac "a" 则 外 改变化 [idtac "b" | idtac "b'"]
+                          否则 外 改变化 [idtac "i" | idtac "i'"] )); idtac "o"; fail .
+  (* a b o *)
+  失败 (                      改变 idtac "a" 则 外 改变化 [idtac "b" | idtac "b'"]
+                          否则 外 改变化 [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  (* a b o *)
+
+Abort.
+
+(** match 目的 与 _ 结束 *)  (** match 颠倒 目的 与 _ 结束 *)
+目的 forall P N : Prop, P.
+  intros P N.
+  
+  外 内 统一 目的 与
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  结束 .
+  外 统一 目的 与
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  结束 .
+  内 统一 目的 与
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  结束 . (** = match 目的 与 _ 结束 *)
+  统一 目的 与
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  结束 .
+
+  外 内 统一 颠倒 目的 与
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  结束 .
+  外 统一 颠倒 目的 与
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  结束 .
+  内 统一 颠倒 目的 与
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  结束 . (** = match 颠倒 目的 与 _ 结束 *)
+  统一 颠倒 目的 与
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  结束 .
+  
+  失败          外 内 统一 目的 与
+         |- P  =>  外 改变化 [idtac "b" | idtac "b'"]; fail
+       | |- P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束; idtac "o"; fail .
+  (* b b' i o i' o *)  (* compare: a b b' i o i' o *)
+  失败                内 统一 目的 与
+         |- P  =>  外 改变化 [idtac "b" | idtac "b'"]; fail
+       | |- P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束; idtac "o"; fail .
+  (* b b' i o *)   (* compare: a b b' i o *)
+  失败 无外 (外 内 统一 目的 与
+         |- P  =>  外 改变化 [idtac "b" | idtac "b'"]; fail
+       | |- P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束); idtac "o"; fail .
+  (* b b' i o *)   (* compare: a b b' i o *)
+  失败          外       统一 目的 与
+         |- P  =>  外 改变化 [idtac "b" | idtac "b'"]; fail
+       | |- P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束; idtac "o"; fail .
+  (* b b' *)   (* compare: a b b' *)
+  失败 无外 (外       统一 目的 与
+         |- P  =>  外 改变化 [idtac "b" | idtac "b'"]; fail
+       | |- P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束); idtac "o"; fail .
+  (* b b' *)   (* compare: a b b' *)
+  失败                      统一 目的 与
+         |- P  =>  外 改变化 [idtac "b" | idtac "b'"]; fail
+       | |- P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束; idtac "o"; fail .
+  (* b b' *)   (* compare: a b b' *)
+
+  
+  失败          外       统一 目的 与
+         |- P  =>  外 改变化 [idtac "b" | idtac "b'"]
+       | |- P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束; idtac "o"; fail .
+  (* b o b' o *)   (* compare: a b o b' o *)
+  失败 无外 (外       统一 目的 与
+         |- P  =>  外 改变化 [idtac "b" | idtac "b'"]
+       | |- P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束); idtac "o"; fail .
+  (* b o *)   (* compare: a b o *)
+  失败                      统一 目的 与
+         |- P  =>  外 改变化 [idtac "b" | idtac "b'"]
+       | |- P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束; idtac "o"; fail .
+  (* b o *)   (* compare: a b o *)
+
+Abort.
+
+(** match _ 与 _ 结束 *)
+目的 forall P N : Prop, True.
+  intros P N.
+  
+  外 内 统一 P 与
+    N => idtac "a"
+  |  P => idtac "b"             
+  结束 .
+  外 统一 P 与
+    N => idtac "a"
+  |  P => idtac "b"             
+  结束 .
+  内 统一 P 与
+    N => idtac "a"
+  |  P => idtac "b"             
+  结束 . (** = match _ 与 _ 结束 *)
+  统一 P 与
+    N => idtac "a"
+  |  P => idtac "b"             
+  结束 .
+
+  
+  失败          外 内 统一 P 与
+          P  =>  外 改变化 [idtac "b" | idtac "b'"]; fail
+       |  P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束; idtac "o"; fail .
+  (* b b' i o i' o *)  (* compare: a b b' i o i' o *)
+  失败                内 统一 P 与
+          P  =>  外 改变化 [idtac "b" | idtac "b'"]; fail
+       |  P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束; idtac "o"; fail .
+  (* b b' i o *)   (* compare: a b b' i o *)
+  失败 无外 (外 内 统一 P 与
+          P  =>  外 改变化 [idtac "b" | idtac "b'"]; fail
+       |  P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束); idtac "o"; fail .
+  (* b b' i o *)   (* compare: a b b' i o *)
+  失败          外       统一 P 与
+          P  =>  外 改变化 [idtac "b" | idtac "b'"]; fail
+       |  P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束; idtac "o"; fail .
+  (* b b' *)   (* compare: a b b' *)
+  失败 无外 (外       统一 P 与
+          P  =>  外 改变化 [idtac "b" | idtac "b'"]; fail
+       |  P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束); idtac "o"; fail .
+  (* b b' *)   (* compare: a b b' *)
+  失败                      统一 P 与
+          P  =>  外 改变化 [idtac "b" | idtac "b'"]; fail
+       |  P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束; idtac "o"; fail .
+  (* b b' *)   (* compare: a b b' *)
+
+  
+  失败          外       统一 P 与
+          P  =>  外 改变化 [idtac "b" | idtac "b'"]
+       |  P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束; idtac "o"; fail .
+  (* b o b' o *)   (* compare: a b o b' o *)
+  失败 无外 (外       统一 P 与
+          P  =>  外 改变化 [idtac "b" | idtac "b'"]
+       |  P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束); idtac "o"; fail .
+  (* b o *)   (* compare: a b o *)
+  失败                      统一 P 与
+          P  =>  外 改变化 [idtac "b" | idtac "b'"]
+       |  P  =>  外 改变化 [idtac "i" | idtac "i'"]
+       结束; idtac "o"; fail .
+  (* b o *)   (* compare: a b o *)
+
+Abort.
+
+
+(** ---------------------------------------------------- *)
+
 
 (** _ + _ *)  (** first [ _ ] *)  (** tryif _ else _ then *)
 Goal True .
