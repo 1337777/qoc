@@ -115,7 +115,7 @@ GRAMMAR EXTEND Gram
   ;
   tactic_then_locality: (* [true] for the local variant [TacThens] and [false]
                            for [TacExtend] *)
-  [ [  "[" ; l = OPT">" -> { if Option.is_empty l then true else false }] ]
+  [ [ "[" ; l = OPT ">" -> { if Option.is_empty l then true else false } ] ]
   ;
   tactic_expr: LEVEL "5"
     [
@@ -124,7 +124,7 @@ GRAMMAR EXTEND Gram
   tactic_expr: LEVEL "4"     
     [ LEFTA
       [
-       ta0 = tactic_expr; ";"; ta1 = binder_tactic -> { TacThen (ta0, ta1) }
+        ta0 = tactic_expr; ";"; ta1 = binder_tactic -> { TacThen (ta0, ta1) }
        |  ta0 = tactic_expr; ";"; ta1 = tactic_expr -> { TacThen (ta0,ta1) }
        | ta0 = tactic_expr; ";"; l = tactic_then_locality; tg = tactic_then_gen; "]" -> {
           let (first,tail) = tg in
@@ -168,9 +168,16 @@ GRAMMAR EXTEND Gram
     [ RIGHTA
       [ ta0 = tactic_expr; "+"; ta1 = binder_tactic -> { TacOr (ta0,ta1) }
       | ta0 = tactic_expr; "+"; ta1 = tactic_expr -> { TacOr (ta0,ta1) }
+
       | IDENT "outer" ; IDENT "alts" ;  "["; l = LIST0 tactic_expr SEP "|"; "]" ->
+      (** = _ + _ *)
         { List.fold_right (fun ta acc -> TacOr (ta,acc)) l
       	      	(TacFail ( TacLocal , fail_default_value , [] )) }
+      | IDENT "alts" ;  "["; l = LIST0  tactic_expr SEP "|"; "]" ->
+        (** = first *)
+        { TacOnce (List.fold_right (fun ta acc -> TacOr (ta,acc)) l
+      	      	(TacFail ( TacLocal , fail_default_value , [] ))) }
+
       | IDENT "outer" ; IDENT "inner" ; IDENT "alter" ; ta = tactic_expr ;
               "then" ; tat = tactic_expr ;
               "else" ; tae = tactic_expr -> { TacOr( TacThen(ta,tat) , tae) }
@@ -179,15 +186,52 @@ GRAMMAR EXTEND Gram
               "else" ; tae = tactic_expr -> { TacOnce (TacOr( TacThen(ta,tat) , tae)) }
       | IDENT "outer" ; IDENT "alter" ; ta = tactic_expr ;
               "then" ; tat = tactic_expr ;
-              "else" ; tae = tactic_expr -> { TacIfThenCatch(ta,tat,tae) }
+              "else" ; tae = tactic_expr ->
+	(** = tryif *)
+        { TacIfThenCatch(ta,tat,tae) }
       | IDENT "alter" ; ta = tactic_expr ;
               "then" ; tat = tactic_expr ;
               "else" ; tae = tactic_expr -> { TacOnce (TacIfThenCatch(ta,tat,tae)) }
+
       | IDENT "tryif" ; ta = tactic_expr ;
               "then" ; tat = tactic_expr ;
               "else" ; tae = tactic_expr -> { TacIfThenCatch(ta,tat,tae) }
       | ta0 = tactic_expr; "||"; ta1 = binder_tactic -> { TacOrelse (ta0,ta1) }
-      | ta0 = tactic_expr; "||"; ta1 = tactic_expr -> { TacOrelse (ta0,ta1) } ] ] ;
+      | ta0 = tactic_expr; "||"; ta1 = tactic_expr -> { TacOrelse (ta0,ta1) }
+
+      | IDENT "outer" ; IDENT "inner" ; IDENT "unify"; IDENT "goal"; "with"; mrl = match_context_list; "end" ->
+          { TacMatchGoal (General,false,mrl) }
+      | IDENT "outer" ; IDENT "unify"; IDENT "goal"; "with"; mrl = match_context_list; "end" ->
+          { TacMatchGoal (Select,false,mrl) }
+      | IDENT "inner" ; IDENT "unify"; IDENT "goal"; "with"; mrl = match_context_list; "end" ->
+      (** = match goal *)
+          { TacMatchGoal (Once,false,mrl) }
+      | IDENT "unify"; IDENT "goal"; "with"; mrl = match_context_list; "end" ->
+          { TacOnce (TacMatchGoal (Select,false,mrl)) } 	  
+
+      | IDENT "outer" ; IDENT "inner" ; IDENT "unify"; IDENT "reverse"; IDENT "goal"; "with";
+        mrl = match_context_list; "end" ->
+          { TacMatchGoal (General,true,mrl) }
+      | IDENT "outer" ; IDENT "unify"; IDENT "reverse"; IDENT "goal"; "with";
+        mrl = match_context_list; "end" ->
+          { TacMatchGoal (Select,true,mrl) }
+      | IDENT "inner" ; IDENT "unify"; IDENT "reverse"; IDENT "goal"; "with";
+        mrl = match_context_list; "end" ->
+      (** = match reverse goal *)
+          { TacMatchGoal (Once,true,mrl) }
+      | IDENT "unify"; IDENT "reverse"; IDENT "goal"; "with";
+        mrl = match_context_list; "end" ->
+          { TacOnce (TacMatchGoal (Select,true,mrl)) }
+
+      |	IDENT "outer" ; IDENT "inner" ; IDENT "unify"; c = tactic_expr; "with"; mrl = match_list; "end" ->
+          { TacMatch (General,c,mrl) }
+      |	IDENT "outer" ; IDENT "unify"; c = tactic_expr; "with"; mrl = match_list; "end" ->
+          { TacMatch (Select,c,mrl) }
+      |	IDENT "inner" ; IDENT "unify"; c = tactic_expr; "with"; mrl = match_list; "end" ->
+      (** = match _ *)
+          { TacMatch (Once,c,mrl) }
+      |	IDENT "unify"; c = tactic_expr; "with"; mrl = match_list; "end" ->
+          { TacOnce (TacMatch (Select,c,mrl)) } ] ] ;
   tactic_expr: LEVEL "1"
     [ RIGHTA
       [ b = match_key; IDENT "goal"; "with"; mrl = match_context_list; "end" ->
@@ -197,13 +241,6 @@ GRAMMAR EXTEND Gram
           { TacMatchGoal (b,true,mrl) }
       |	b = match_key; c = tactic_expr; "with"; mrl = match_list; "end" ->
           { TacMatch (b,c,mrl) }
-      | IDENT "alts" (* first *) ;  "["; l = LIST0  tactic_expr SEP "|"; "]" ->
-        { TacOnce (List.fold_right (fun ta acc -> TacOr (ta,acc)) l
-      	      	(TacFail ( TacLocal , fail_default_value , [] ))) }
-(*      | IDENT "alts" (* first *) ;  "["; l = LIST0 (OPT tactic_expr) SEP "|"; "]" ->
-        { TacOnce (List.fold_right (fun ta acc -> match ta with None ->
-	  		  TacOr ( TacId [] , acc) | Some ta -> TacOr (ta,acc) ) l
-      	      	(TacFail ( TacLocal , fail_default_value , [] ))) }*)
       | IDENT "first" ; "["; l = LIST0 tactic_expr SEP "|"; "]" ->
 	  { TacFirst l }
       | IDENT "solve" ; "["; l = LIST0 tactic_expr SEP "|"; "]" ->
@@ -282,9 +319,12 @@ GRAMMAR EXTEND Gram
       | "()" -> { TacGeneric (genarg_of_unit ()) } ] ]
   ; 
   match_key:
-    [ [ "match" -> { Once }
+    [ [ "match" -> { Once } 
+      | IDENT "inner" ; IDENT "unify" -> { Once }
       | "lazymatch" -> { Select }
-      | "multimatch" -> { General } ] ]
+      | IDENT "outer" ; IDENT "unify" -> { Select }
+      | "multimatch" -> { General }
+      | IDENT "outer" ; IDENT "inner" ; IDENT "unify" -> { General } ] ]
   ;
   input_fun:
     [ [ "_" -> { Name.Anonymous }

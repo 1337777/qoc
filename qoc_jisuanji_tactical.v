@@ -6,13 +6,13 @@ From Qoc Require Import Jisuanji .
 
 Short :: one command/tactic "A" may act on a goal/problem and generate many new smaller subgoals . Then some command "D" among many "alternative" commands may be in "sequence" near one of these subgoals . But which is this "sequence" subgoal and which is this "alternative" command ?
 
- Example :  "A ; sequence [> ( alternative ( B1 => C | B2 => D ) ) & E ]"
+ Example :  "A ; [> ( alts [ B | B' ] ) & E ]"
 
 Outline ::
-* PART1 : SEQUENCING TACTICS
-* PART2 : ALTERNATING TACTICS  *)
+* PART1 : SEQUENCES TACTIC
+* PART2 : ALTERNATIVES TACTIC  *)
 
-(** PART1 : SEQUENCING TACTICS *)
+(** PART1 : SEQUENCES TACTIC *)
 
 Goal forall n : nat + nat , forall b : bool + bool , ( n = n /\ b = b ) .
   intros n b.
@@ -119,14 +119,16 @@ Goal forall B C D : Prop, (False /\ B) /\ (C /\ D).
 Abort.
 
 
-(** PART2 : ALTERNATING TACTICS  *)
+(** PART2 : ALTERNATIVES TACTIC  *)
 
-Goal forall n : nat + nat , forall b : bool + bool , ( n = n /\ b = b ) .
-  intros.
+
+(** _ + _ *)  (** first [ _ ] *)  (** tryif _ else _ then *)
+Goal True .
+  outer alts [fail | idtac "a" ]. (** = _ + _ *)
+  alts [fail | idtac "a" ]. (** = first [ _ ] *)
+
   Fail outer alts [ ] .
-  outer alts [fail | idtac].
   Fail alts [ ] .
-  alts [fail | idtac].
 
   Fail outer alts [ fail | idtac "a" | idtac "b"  ]; idtac "c"; fail .
   (* a c b c *)
@@ -135,20 +137,30 @@ Goal forall n : nat + nat , forall b : bool + bool , ( n = n /\ b = b ) .
   Fail alts [ fail | idtac "a" | idtac "b"  ]; idtac "c"; fail .
   (* a c *)
 
+  outer inner alter fail then idtac "a"
+                    else idtac "b" .
+  outer alter fail then idtac "a"
+                    else idtac "b" . (** = tryif _ else _ then *)
+  inner alter fail then idtac "a"
+                    else idtac "b" .
+  alter fail then idtac "a"
+                    else idtac "b" .
+
+
   Fail (          outer inner alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
                            else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
   (*  a b b' i o i' o *)
   Fail (                inner alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
                           else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
   (* a b b' i o *)
-  Fail ( no_outer outer inner alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
-                           else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  Fail (no_outer (outer inner alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
+                           else outer alts [idtac "i" | idtac "i'"] )); idtac "o"; fail .
   (* a b b' i o *)
   Fail (          outer       alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
                           else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
   (* a b b' *)
-  Fail (no_outer  outer       alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
-                          else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  Fail (no_outer (outer       alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
+                          else outer alts [idtac "i" | idtac "i'"] )); idtac "o"; fail .
   (* a b b' *)
   Fail (                      alter idtac "a" then outer alts [idtac "b" | idtac "b'"]; fail
                           else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
@@ -157,11 +169,171 @@ Goal forall n : nat + nat , forall b : bool + bool , ( n = n /\ b = b ) .
   Fail (          outer       alter idtac "a" then outer alts [idtac "b" | idtac "b'"]
                           else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
   (* a b o b' o *)
-  Fail (no_outer  outer       alter idtac "a" then outer alts [idtac "b" | idtac "b'"]
-                          else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
+  Fail (no_outer (outer       alter idtac "a" then outer alts [idtac "b" | idtac "b'"]
+                          else outer alts [idtac "i" | idtac "i'"] )); idtac "o"; fail .
   (* a b o *)
   Fail (                      alter idtac "a" then outer alts [idtac "b" | idtac "b'"]
                           else outer alts [idtac "i" | idtac "i'"] ); idtac "o"; fail .
   (* a b o *)
+
+Abort.
+
+(** match goal with _ end *)  (** match reverse goal with _ end *)
+Goal forall P N : Prop, P.
+  intros P N.
+  
+  outer inner unify goal with
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  end .
+  outer unify goal with
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  end .
+  inner unify goal with
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  end . (** = match goal with _ end *)
+  unify goal with
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  end .
+
+  outer inner unify reverse goal with
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  end .
+  outer unify reverse goal with
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  end .
+  inner unify reverse goal with
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  end . (** = match reverse goal with _ end *)
+  unify reverse goal with
+   |- N => idtac "a"
+  | |- P => idtac "b"            
+  end .
+  
+  Fail          outer inner unify goal with
+         |- P  =>  outer alts [idtac "b" | idtac "b'"]; fail
+       | |- P  =>  outer alts [idtac "i" | idtac "i'"]
+       end; idtac "o"; fail .
+  (* b b' i o i' o *)  (* compare: a b b' i o i' o *)
+  Fail                inner unify goal with
+         |- P  =>  outer alts [idtac "b" | idtac "b'"]; fail
+       | |- P  =>  outer alts [idtac "i" | idtac "i'"]
+       end; idtac "o"; fail .
+  (* b b' i o *)   (* compare: a b b' i o *)
+  Fail no_outer (outer inner unify goal with
+         |- P  =>  outer alts [idtac "b" | idtac "b'"]; fail
+       | |- P  =>  outer alts [idtac "i" | idtac "i'"]
+       end); idtac "o"; fail .
+  (* b b' i o *)   (* compare: a b b' i o *)
+  Fail          outer       unify goal with
+         |- P  =>  outer alts [idtac "b" | idtac "b'"]; fail
+       | |- P  =>  outer alts [idtac "i" | idtac "i'"]
+       end; idtac "o"; fail .
+  (* b b' *)   (* compare: a b b' *)
+  Fail no_outer (outer       unify goal with
+         |- P  =>  outer alts [idtac "b" | idtac "b'"]; fail
+       | |- P  =>  outer alts [idtac "i" | idtac "i'"]
+       end); idtac "o"; fail .
+  (* b b' *)   (* compare: a b b' *)
+  Fail                      unify goal with
+         |- P  =>  outer alts [idtac "b" | idtac "b'"]; fail
+       | |- P  =>  outer alts [idtac "i" | idtac "i'"]
+       end; idtac "o"; fail .
+  (* b b' *)   (* compare: a b b' *)
+
+  
+  Fail          outer       unify goal with
+         |- P  =>  outer alts [idtac "b" | idtac "b'"]
+       | |- P  =>  outer alts [idtac "i" | idtac "i'"]
+       end; idtac "o"; fail .
+  (* b o b' o *)   (* compare: a b o b' o *)
+  Fail no_outer (outer       unify goal with
+         |- P  =>  outer alts [idtac "b" | idtac "b'"]
+       | |- P  =>  outer alts [idtac "i" | idtac "i'"]
+       end); idtac "o"; fail .
+  (* b o *)   (* compare: a b o *)
+  Fail                      unify goal with
+         |- P  =>  outer alts [idtac "b" | idtac "b'"]
+       | |- P  =>  outer alts [idtac "i" | idtac "i'"]
+       end; idtac "o"; fail .
+  (* b o *)   (* compare: a b o *)
+
+Abort.
+
+(** match _ with _ end *)
+Goal forall P N : Prop, True.
+  intros P N.
+  
+  outer inner unify P with
+    N => idtac "a"
+  |  P => idtac "b"             
+  end .
+  outer unify P with
+    N => idtac "a"
+  |  P => idtac "b"             
+  end .
+  inner unify P with
+    N => idtac "a"
+  |  P => idtac "b"             
+  end . (** = match _ with _ end *)
+  unify P with
+    N => idtac "a"
+  |  P => idtac "b"             
+  end .
+
+  
+  Fail          outer inner unify P with
+          P  =>  outer alts [idtac "b" | idtac "b'"]; fail
+       |  P  =>  outer alts [idtac "i" | idtac "i'"]
+       end; idtac "o"; fail .
+  (* b b' i o i' o *)  (* compare: a b b' i o i' o *)
+  Fail                inner unify P with
+          P  =>  outer alts [idtac "b" | idtac "b'"]; fail
+       |  P  =>  outer alts [idtac "i" | idtac "i'"]
+       end; idtac "o"; fail .
+  (* b b' i o *)   (* compare: a b b' i o *)
+  Fail no_outer (outer inner unify P with
+          P  =>  outer alts [idtac "b" | idtac "b'"]; fail
+       |  P  =>  outer alts [idtac "i" | idtac "i'"]
+       end); idtac "o"; fail .
+  (* b b' i o *)   (* compare: a b b' i o *)
+  Fail          outer       unify P with
+          P  =>  outer alts [idtac "b" | idtac "b'"]; fail
+       |  P  =>  outer alts [idtac "i" | idtac "i'"]
+       end; idtac "o"; fail .
+  (* b b' *)   (* compare: a b b' *)
+  Fail no_outer (outer       unify P with
+          P  =>  outer alts [idtac "b" | idtac "b'"]; fail
+       |  P  =>  outer alts [idtac "i" | idtac "i'"]
+       end); idtac "o"; fail .
+  (* b b' *)   (* compare: a b b' *)
+  Fail                      unify P with
+          P  =>  outer alts [idtac "b" | idtac "b'"]; fail
+       |  P  =>  outer alts [idtac "i" | idtac "i'"]
+       end; idtac "o"; fail .
+  (* b b' *)   (* compare: a b b' *)
+
+  
+  Fail          outer       unify P with
+          P  =>  outer alts [idtac "b" | idtac "b'"]
+       |  P  =>  outer alts [idtac "i" | idtac "i'"]
+       end; idtac "o"; fail .
+  (* b o b' o *)   (* compare: a b o b' o *)
+  Fail no_outer (outer       unify P with
+          P  =>  outer alts [idtac "b" | idtac "b'"]
+       |  P  =>  outer alts [idtac "i" | idtac "i'"]
+       end); idtac "o"; fail .
+  (* b o *)   (* compare: a b o *)
+  Fail                      unify P with
+          P  =>  outer alts [idtac "b" | idtac "b'"]
+       |  P  =>  outer alts [idtac "i" | idtac "i'"]
+       end; idtac "o"; fail .
+  (* b o *)   (* compare: a b o *)
 
 Abort.
