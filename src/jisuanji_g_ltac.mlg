@@ -322,6 +322,8 @@ GRAMMAR EXTEND Gram
           | Some (t,tl) -> TacExtendTac(Array.of_list tf,t,tl)
           | None -> TacDispatch tf
           end }
+      | "[" ; "+" ; ta0 = tactic_expr; "|"; ta1 = binder_tactic ; "]" -> { TacOr (ta0,ta1) }
+      | "[" ; "+" ; ta0 = tactic_expr; "|"; ta1 = tactic_expr ; "]" -> { TacOr (ta0,ta1) }
 	  
       | a = tactic_atom -> { TacArg (CAst.make ~loc a) }  ]  ]
   ;

@@ -2,17 +2,22 @@ From Qoc Require Import Jisuanji .
 
 (** 
 
-短 :: 一个命令/策略“A”可以对目标/问题起作用并产生许多新的较小的子目标。然后，许多“替代”命令中的一些命令“D”可以在这些子目标中的一个附近“序列”。但是这个“序列”子目标是哪个，这是“替代”命令？
+短 :: 示例：“A ; [> W & [+ T1 | T2 ] ]”。
+建筑师“A”将主要问题“（1）”计划为两个“后续”子问题：工人“W”的子问题“（1> 1）”以及“并行”子问题“ （1> 2）”为工人“T”。
+工人“W”尝试他的唯一战术“W”，解决了他的子问题“（1> 1）”。
+与此同时，工人“T”尝试了他的第一个失败的战术“T1”;但他的“替代”策略“T2”解决了他的子问题“（1> 2）”。
 
-Short :: one command/tactic "A" may act on a goal/problem and generate many new smaller subgoals . Then some command "D" among many "alternative" commands may be in "sequence" near one of these subgoals . But which is this "sequence" subgoal and which is this "alternative" command ?
-
- Example :  "A ; [> ( alts [ B | B' ] ) & E ]"
+Short :: Example : "A ; [> W & [+ T1 | T2 ] ]" .
+The architech "A" plans the main problem "(1)" into two "subsequent" sub-problems : the sub-problem "(1>1)" for the worker "W" and also the "parallel" sub-problem "(1>2)" for the worker "T" . 
+The worker "W" tries his only tactic "W" which solves his sub-problem "(1>1)" . 
+Meanwhile the worker "T" tries his first tactic "T1" which fails ;  but his "alternative" tactic "T2" solves his sub-problem "(1>2)" .
 
 Outline ::
-* PART1 : SEQUENCES TACTIC
-* PART2 : ALTERNATIVES TACTIC  *)
+ * PART 1 : PARALLEL SUBSEQUENT TACTICS . 第1部分 : 平行随后的战术
+ * PART 2 : ALTERNATIVE TACTIC INSTEAD OF FAILED TACTIC . 第2部分 : 失败的战术的替代战术  *)
 
-(** PART1 : SEQUENCES TACTIC *)
+
+(** * PART 1 : PARALLEL SUBSEQUENT TACTICS . 第1部分 : 平行随后的战术 *)
 
 Goal forall n : nat + nat , forall b : bool + bool , ( n = n /\ b = b ) .
   intros n b.
@@ -44,46 +49,9 @@ Goal forall B C D : Prop, (False /\ B) /\ (C /\ D).
 
 Abort.
 
-(*
-Goal forall n: Nat + nat, forall b: Bool + bool, (n = n/\ b = b).
-  Intros n b.
-  Jiěgòu n. Undo.
-  Jiěgòu n  ; jiěgòu b. Undo.
 
-  Jiěgòu n; (jiěgòu b;
-                [> idtac & idtac & idtac & idtac] ). Undo.
-  Jiěgòu n; (inner: Jiěgòu b;
-               [> idtac & idtac] ). Undo.
-  Jiěgòu n; inner: Jiěgòu b;
-                       [> idtac & idtac]  . Undo.
-  Jiěgòu n; (jiěgòu b;
-                [idtac & idtac] ). Undo.
-
-  (** Nei*)
-  jiěgòu n; (nèi: Jiěgòu b;
-               [> idtac & idtac] ). Undo.
-  
-Abort.
-
-Goal forall B C D: Prop, (False/\ B)/\ (C/\ D).
-  Split; split. Undo.
-  Zuò 2 split. Undo.
-  Chóngfù split. Undo.
-  Jìnzhǎn chóngfù split.
-  1: {
-    Shībài jìnzhǎn chóngfù split.
-    Chángshì jìnzhǎn chóngfù split.
-    Chéngrèn.
-  }
-
-Abort.
-
-*)
-
-(** --------------------------------------------------- *)
-
-
-
+(** ** alt
+----------------------------------------------------------------------------- *)
 
 Goal forall n : nat + nat , forall b : bool + bool , ( n = n /\ b = b ) .
   intros n b.
@@ -119,10 +87,15 @@ Goal forall B C D : Prop, (False /\ B) /\ (C /\ D).
 Abort.
 
 
-(** PART2 : ALTERNATIVES TACTIC  *)
+(**
+----------------------------------------------------------------------------- *)
+
+
+(** * PART 2 : ALTERNATIVE TACTIC INSTEAD OF FAILED TACTIC . 第2部分 : 失败的战术的替代战术  *)
 
 (** _ + _ *)  (** first [ _ ] *)  (** tryif _ 否则 _ 则 *)
 目的 True .
+  [+ fail | idtac "a" ]. (** = _ + _ *)
   外 改变化 [fail | idtac "a" ]. (** = _ + _ *)
   改变化 [fail | idtac "a" ]. (** = first [ _ ] *)
 
@@ -338,11 +311,13 @@ Abort.
 Abort.
 
 
-(** ---------------------------------------------------- *)
+(** ** alt
+----------------------------------------------------------------------------- *)
 
 
 (** _ + _ *)  (** first [ _ ] *)  (** tryif _ else _ then *)
 Goal True .
+  [+ fail | idtac "a" ]. (** = _ + _ *)
   outer alts [fail | idtac "a" ]. (** = _ + _ *)
   alts [fail | idtac "a" ]. (** = first [ _ ] *)
 
