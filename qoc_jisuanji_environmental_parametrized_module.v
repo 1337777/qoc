@@ -26,7 +26,7 @@ From Qoc Require Import Jisuanji .
   (** Dìngyì l: P -> d. *)
   证明.
     (** Zhèngmíng.*)
-    介绍们 x.
+    移动外 x.
     (** Jièshàomen x. *)
     确切 (pair x x).
     (** Quèqiè (pair x x). *)

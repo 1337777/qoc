@@ -230,7 +230,9 @@ END
 
 TACTIC EXTEND intro
 | [ "intro" ] -> { Tactics.intro_move None MoveLast }
+| [ "移动外个" (* "yidong wai ge" ; OLD: "intro" *) ] -> { Tactics.intro_move None MoveLast }
 | [ "intro" ident(id) ] -> { Tactics.intro_move (Some id) MoveLast }
+| [ "移动外个" (* "yidong wai ge" ; OLD: "intro" *) ident(id) ] -> { Tactics.intro_move (Some id) MoveLast }
 | [ "intro" ident(id) "at" "top" ] -> { Tactics.intro_move (Some id) MoveFirst }
 | [ "intro" ident(id) "at" "bottom" ] -> { Tactics.intro_move (Some id) MoveLast }
 | [ "intro" ident(id) "after" hyp(h) ] -> { Tactics.intro_move (Some id) (MoveAfter h) }
@@ -359,13 +361,15 @@ let initial_atomic () =
         "simpl", TacReduce(Simpl (Redops.all_flags,None),nocl);
         "compute", TacReduce(Cbv Redops.all_flags,nocl);
         "intros", TacIntroPattern (false,[]);
-	"介绍们" (* "介绍们" "jieshaomen" ; OLD: "intros" *) , TacIntroPattern (false,[]);
+	"移动外" (* "移动外" "yidong wai" ; OLD: "intros" *) , TacIntroPattern (false,[]);
       ]
   in
   let iter (s, t) = Tacenv.register_ltac false false (Names.Id.of_string s) t in
   List.iter iter
       [ "idtac",TacId [];
+        "零战术" (* "ling zhanshu" ; OLD: "idtac" *),TacId [];
         "fail", TacFail(TacLocal,ArgArg 0,[]);
+	"失败" (* "失败" "shibai" ; OLD: "fail" *), TacFail(TacLocal,ArgArg 0,[]);
         "fresh", TacArg(CAst.make @@ TacFreshId [])
       ]
 

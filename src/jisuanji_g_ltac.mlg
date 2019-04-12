@@ -178,6 +178,24 @@ GRAMMAR EXTEND Gram
         { TacOnce (List.fold_right (fun ta acc -> TacOr (ta,acc)) l
       	      	(TacFail ( TacLocal , fail_default_value , [] ))) }
 
+      | IDENT "outer" ; IDENT "inner" ; IDENT "alter" ;
+      	IDENT "with" ; mrl = unify_list; IDENT "end" ->
+	{ List.fold_right (fun ta acc -> TacOr (TacThen(fst ta, snd ta),acc)) mrl
+      	      	(TacFail ( TacLocal , fail_default_value , [] )) }
+      | IDENT "inner" ; IDENT "alter" ;
+      	IDENT "with" ; mrl = unify_list; IDENT "end" ->
+	{ (*COMPUTE HERE: *) TacOnce (List.fold_right (fun ta acc ->
+	  (*MATH HERE: TacOnce *) (TacOr (TacThen(fst ta, snd ta),acc))) mrl
+      	      	(TacFail ( TacLocal , fail_default_value , [] ))) }
+      | IDENT "outer" ; IDENT "alter" ;
+      	IDENT "with" ; mrl = unify_list; IDENT "end" ->
+	{ List.fold_right (fun ta acc -> TacIfThenCatch(fst ta, snd ta, acc)) mrl
+      	      	(TacFail ( TacLocal , fail_default_value , [] )) }
+      | IDENT "alter" ;
+      	IDENT "with" ; mrl = unify_list; IDENT "end" ->
+	{ TacOnce (List.fold_right (fun ta acc -> TacIfThenCatch(fst ta, snd ta, acc)) mrl
+      	      	(TacFail ( TacLocal , fail_default_value , [] ))) }
+
       | IDENT "outer" ; IDENT "inner" ; IDENT "alter" ; ta = tactic_expr ;
               "then" ; tat = tactic_expr ;
               "else" ; tae = tactic_expr -> { TacOr( TacThen(ta,tat) , tae) }
@@ -193,7 +211,25 @@ GRAMMAR EXTEND Gram
               "then" ; tat = tactic_expr ;
               "else" ; tae = tactic_expr -> { TacOnce (TacIfThenCatch(ta,tat,tae)) }
 
-     | IDENT "外" ; IDENT "改变化" ;  "["; l = LIST0 tactic_expr SEP "|"; "]" ->
+      | IDENT "外" ; IDENT "内" ; IDENT "改变" ;
+      	IDENT "与" ; mrl = unify_list; IDENT "结束" ->
+	{ List.fold_right (fun ta acc -> TacOr (TacThen(fst ta, snd ta),acc)) mrl
+      	      	(TacFail ( TacLocal , fail_default_value , [] )) }
+      | IDENT "内" ; IDENT "改变" ;
+      	IDENT "与" ; mrl = unify_list; IDENT "结束" ->
+	{ (*COMPUTE HERE: *) TacOnce (List.fold_right (fun ta acc ->
+	  (*MATH HERE: TacOnce *) (TacOr (TacThen(fst ta, snd ta),acc))) mrl
+      	      	(TacFail ( TacLocal , fail_default_value , [] ))) }
+      | IDENT "外" ; IDENT "改变" ;
+      	IDENT "与" ; mrl = unify_list; IDENT "结束" ->
+	{ List.fold_right (fun ta acc -> TacIfThenCatch(fst ta, snd ta, acc)) mrl
+      	      	(TacFail ( TacLocal , fail_default_value , [] )) }
+      | IDENT "改变" ;
+      	IDENT "与" ; mrl = unify_list; IDENT "结束" ->
+	{ TacOnce (List.fold_right (fun ta acc -> TacIfThenCatch(fst ta, snd ta, acc)) mrl
+      	      	(TacFail ( TacLocal , fail_default_value , [] ))) }
+
+      | IDENT "外" ; IDENT "改变化" ;  "["; l = LIST0 tactic_expr SEP "|"; "]" ->
       (** = _ + _ *)
         { List.fold_right (fun ta acc -> TacOr (ta,acc)) l
       	      	(TacFail ( TacLocal , fail_default_value , [] )) }
@@ -304,7 +340,7 @@ GRAMMAR EXTEND Gram
       | IDENT "solve" ; "["; l = LIST0 tactic_expr SEP "|"; "]" ->
 	  { TacSolve l }
       | IDENT "idtac"; l = LIST0 message_token -> { TacId l }
-      | IDENT "idtac"; l = LIST0 message_token -> { TacId l }
+      | IDENT "零战术" (* "ling zhanshu" ; OLD: "idtac" *) ; l = LIST0 message_token -> { TacId l }
       | g=failkw; n = [ n = int_or_var -> { n } | -> { fail_default_value } ];
 	  l = LIST0 message_token -> { TacFail (g,n,l) }
       | st = simple_tactic -> { st }
@@ -328,7 +364,9 @@ GRAMMAR EXTEND Gram
       | a = tactic_atom -> { TacArg (CAst.make ~loc a) }  ]  ]
   ;
   failkw:
-  [ [ IDENT "fail" -> { TacLocal } | IDENT "gfail" -> { TacGlobal } ] ]
+  [ [ IDENT "fail" -> { TacLocal }
+  | IDENT "失败" (* "失败" "shibai" ; OLD: "fail" *) -> { TacLocal }
+  | IDENT "gfail" -> { TacGlobal } ] ]
   ;
   (* binder_tactic: level 5 of tactic_expr *)
   binder_tactic:
@@ -435,6 +473,14 @@ GRAMMAR EXTEND Gram
   match_list:
     [ [ mrl = LIST1 match_rule SEP "|" -> { mrl }
       | "|"; mrl = LIST1 match_rule SEP "|" -> { mrl } ] ]
+  ;
+  unify_rule:
+    [ [ mp = tactic_expr; ";=>"; te = tactic_expr -> { (mp,te) }
+      | "_"; ";=>"; te = tactic_expr -> { (TacId [], te) } ] ]
+  ;
+  unify_list:
+    [ [ mrl = LIST1 unify_rule SEP "|" -> { mrl }
+      | "|"; mrl = LIST1 unify_rule SEP "|" -> { mrl } ] ]
   ;
   message_token:
     [ [ id = identref -> { MsgIdent id }

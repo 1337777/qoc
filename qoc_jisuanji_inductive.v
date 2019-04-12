@@ -39,7 +39,7 @@ From Qoc Require Import Jisuanji .
     jiā gèng duō (xià yīgè líng) p wài nèi = jiā gèng duō p wài nèi (xià yīgè líng). *)
 证明 .
 (** Zhèngmíng. *)
-  介绍们 p外内 .
+  移动外 p外内 .
   (** Jièshàomen p wài nèi. *)
   简化 .
   (** Jiǎnhuà. *)
@@ -53,9 +53,9 @@ From Qoc Require Import Jisuanji .
     (** Tóngyī. *)
   - (** p外内 是 ( 下一个 q外内 ) *)
     (** P wài nèi shì (xià yīgè q wài nèi) *)
-    介绍们 q外内 .
+    移动外 q外内 .
     (** jièshàomen q wài nèi. *)
-    介绍们 论点1_q外内 .
+    移动外 论点1_q外内 .
     (** Jièshàomen lùndiǎn 1_q wài nèi. *)
     简化 .
     (** Jiǎnhuà. *)

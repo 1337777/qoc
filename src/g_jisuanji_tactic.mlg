@@ -540,11 +540,11 @@ GRAMMAR EXTEND Gram
       (* Basic tactics *)
         IDENT "intros"; pl = ne_intropatterns ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (false,pl)) }
-      | IDENT "介绍们" (* "介绍们" "jieshaomen" ; OLD: "intros" *)  ; pl = ne_intropatterns ->
+      | IDENT "移动外" (* "移动外" "yidong wai" ; OLD: "intros" *)  ; pl = ne_intropatterns ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (false,pl)) }
       | IDENT "intros" ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (false,[CAst.make ~loc @@IntroForthcoming false])) }
-      | IDENT "介绍们" (* "介绍们" "jieshaomen" ; OLD: "intros" *)  ->
+      | IDENT "移动外" (* "移动外" "yidong wai" ; OLD: "intros" *)  ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (false,[CAst.make ~loc @@IntroForthcoming false])) }
       | IDENT "eintros"; pl = ne_intropatterns ->
           { TacAtom (CAst.make ~loc @@ TacIntroPattern (true,pl)) }

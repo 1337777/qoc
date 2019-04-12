@@ -37,7 +37,7 @@ From Qoc Require Import Jisuanji .
 (** Dìngyì shèng xià_duìyú_xùliè'duō tài: Yòng (shùjù: Lèixíng) (l: Xùliè'duō tài shùjù), xùliè'duō tài shùjù. *)
 证明 .
 (** Zhèngmíng. *)
-  介绍们 数据 l . 解构 l 如 [ | dat l' ] .
+  移动外 数据 l . 解构 l 如 [ | dat l' ] .
   (** Jièshàomen shùjù l. Jiěgòu l rú [| dat l' ]. *)
   - 确切 (空的 数据) .
   (**  Quèqiè (kōng de shùjù). *)
@@ -139,11 +139,11 @@ From Qoc Require Import Jisuanji .
 (** Dìngyì dǐngbù_duìyú_xùliè'duō tài: Yòng (shùjù: Lèixíng) (l: Xùliè'duō tài shùjù), xuǎnxiàng'duō tài shùjù. *)
 证明 .
 (** Zhèngmíng. *)
-  介绍们 数据 l . 例子 l .
+  移动外 数据 l . 例子 l .
   (** Jièshàomen shùjù l. Lìzi l. *)
   - 确切 (键入_无效 数据).
     (** Quèqiè (jiànrù_wúxiào shùjù). *)
-  - 介绍们 dat l' .
+  - 移动外 dat l' .
     (** Jièshàomen dat l' . *)
     应用 (键入_效 数据) .
     (** Yìngyòng (jiànrù_xiào shùjù). *)
@@ -167,7 +167,7 @@ From Qoc Require Import Jisuanji .
     (** Lìzi (dǐbù_duìyú_xùliè'duō tài shùjù l'). *)
     + 确切 (键入_效 数据 dat).
       (** Quèqiè (jiànrù_xiào shùjù dat). *)
-    + 清除 l' . 介绍们 底部_对于_序列'多态_数据_l' .
+    + 清除 l' . 移动外 底部_对于_序列'多态_数据_l' .
       (** Qīngchú l' . Jièshàomen dǐbù_duìyú_xùliè'duō tài_shùjù_l' . *)
       应用 (键入_效 数据).
       (** Yìngyòng (jiànrù_xiào shùjù). *)

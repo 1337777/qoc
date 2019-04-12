@@ -59,7 +59,7 @@ From Qoc Require Import Jisuanji .
     Yòng (p: Wúxiàn shùzì) (l: Shūrù'cānshù p), lèixíng. *)
   证明 .
   (** Zhèngmíng. *)
-    介绍们 p . 例子 p (** 因为[无限数字]是计算的 *) .
+    移动外 p . 例子 p (** 因为[无限数字]是计算的 *) .
     (** Jièshàomen p. Lìzi p . *)
     - 确切 公式_零.
     (** Quèqiè gōngshì_líng. *)
@@ -77,7 +77,7 @@ From Qoc Require Import Jisuanji .
       jiégòu huà de'xuǎnxiàngmen'duō tài'cānshù p l. *)
   证明.
   (** Zhèngmíng. *)
-    介绍们 p l f .
+    移动外 p l f .
     (** Jièshàomen p l f. *)
     加细 (匹配 f 与
               参数_零 l f => f
@@ -97,7 +97,7 @@ From Qoc Require Import Jisuanji .
     Yòng (l: Shūrù'cānshù líng) (f: Xuǎnxiàngmen'duō tài'cānshù líng l), gōngshì_líng l. *)
   证明 .
   (** Zhèngmíng. *)
-    介绍们 l . 确切 (结构化的'选项们'多态'参数_对于_选项们'多态'参数 零 l) .
+    移动外 l . 确切 (结构化的'选项们'多态'参数_对于_选项们'多态'参数 零 l) .
     (** Jièshàomen l. Quèqiè (jiégòu huà de'xuǎnxiàngmen'duō tài'cānshù_duìyú_xuǎnxiàngmen'duō tài'cānshù líng l). *)
   定义了 .
   (** Dìngyìle. *)  
@@ -148,13 +148,13 @@ From Qoc Require Import Jisuanji .
         xuǎnxiàngmen'duō tài'cānshù xùliè'duō tài'cānshù gōngshì_líng gōngshì_xià yīgè p l. *)
     证明 .
     (** Zhèngmíng. *)
-      介绍们 p l . 例子 l .
+      移动外 p l . 例子 l .
       (** Jièshàomen p l. Lìzi l. *)
       - 应用 (参数_零 序列'多态'参数 公式_零 公式_下一个) . 展开 公式_零 .
         (** Yìngyòng (cānshù_líng xùliè'duō tài'cānshù gōngshì_líng gōngshì_xià yīgè). Zhǎnkāi gōngshì_líng. *)
         确切 空的 .
         (** Quèqiè kōng de. *)
-      - 介绍们 d q l' . 
+      - 移动外 d q l' . 
         (** Jièshàomen d q l' .  *)
         应用 (参数_下一个 序列'多态'参数 公式_零 公式_下一个) . 展开 公式_下一个 .
         (** Yìngyòng (cānshù_xià yīgè xùliè'duō tài'cānshù gōngshì_líng gōngshì_xià yīgè). Zhǎnkāi gōngshì_xià yīgè. *)
@@ -167,7 +167,7 @@ From Qoc Require Import Jisuanji .
     (** Dìngyì shèng xià_duìyú_xùliè'duō tài'cānshù_líng: Yòng (l: Xùliè'duō tài'cānshù líng), xùliè'duō tài'cānshù líng. *)
     证明 .
     (** Zhèngmíng. *)
-      介绍们 l .
+      移动外 l .
       (** Jièshàomen l. *)
       应用(公式_零_对于_选项们'多态'参数__零 序列'多态'参数 公式_零 公式_下一个 l).
       (** Yìngyòng (gōngshì_líng_duìyú_xuǎnxiàngmen'duō tài'cānshù__líng xùliè'duō tài'cānshù gōngshì_líng gōngshì_xià yīgè l). *)
@@ -209,13 +209,13 @@ From Qoc Require Import Jisuanji .
       xuǎnxiàngmen'duō tài'cānshù xùliè'duō tài'cānshù gōngshì_líng gōngshì_xià yīgè p l. *)
     证明 .
     (** Zhèngmíng. *)
-      介绍们 p l . 例子 l .
+      移动外 p l . 例子 l .
       (** Jièshàomen p l. Lìzi l. *)
       - 应用 (参数_零 序列'多态'参数 公式_零 公式_下一个) . 展开 公式_零 .
         (** Yìngyòng (cānshù_líng xùliè'duō tài'cānshù gōngshì_líng gōngshì_xià yīgè). Zhǎnkāi gōngshì_líng. *)
         确切 单 .
         (** Quèqiè dān. *)
-      - 介绍们 dat q l' .
+      - 移动外 dat q l' .
         (** Jièshàomen dat q l' . *)
         应用 (参数_下一个 序列'多态'参数 公式_零 公式_下一个) . 展开 公式_下一个 .
         (** Yìngyòng (cānshù_xià yīgè xùliè'duō tài'cānshù gōngshì_líng gōngshì_xià yīgè). Zhǎnkāi gōngshì_xià yīgè. *)
@@ -230,7 +230,7 @@ From Qoc Require Import Jisuanji .
       Yòng (q: Wúxiàn shùzì) (l: Xùliè'duō tài'cānshù (xià yīgè q)), shùjù. *)
     证明 .
       (** Zhèngmíng. *)
-      介绍们 q l . 应用 (公式_下一个_对于_选项们'多态'参数__下一个 序列'多态'参数 公式_零 公式_下一个 q l) .
+      移动外 q l . 应用 (公式_下一个_对于_选项们'多态'参数__下一个 序列'多态'参数 公式_零 公式_下一个 q l) .
       (** Jièshàomen q l. Yìngyòng (gōngshì_xià yīgè_duìyú_xuǎnxiàngmen'duō tài'cānshù__xià yīgè xùliè'duō tài'cānshù gōngshì_líng gōngshì_xià yīgè q l). *)
       确切 (顶部_对于_序列'多态'参数 (下一个 q) l) .
       (** Quèqiè (dǐngbù_duìyú_xùliè'duō tài'cānshù (xià yīgè q) l). *)
@@ -272,11 +272,11 @@ From Qoc Require Import Jisuanji .
         (** Yìngyòng (cānshù_líng xùliè'duō tài'cānshù gōngshì_líng gōngshì_xià yīgè). Zhǎnkāi gōngshì_líng. *)
         确切 单 .
         (** Quèqiè dān. *)
-      - 清除 p l . 介绍们 dat q l' .
+      - 清除 p l . 移动外 dat q l' .
         (** Qīngchú p l. Jièshàomen dat q l' . *)
         例子 (底部_对于_序列'多态'参数 q l').
         (** Lìzi (dǐbù_duìyú_xùliè'duō tài'cānshù q l'). *)
-        + 清除 q l' ; 介绍们 l' . 介绍们 底部_对于_序列'多态'参数_q_l' .
+        + 清除 q l' ; 移动外 l' . 移动外 底部_对于_序列'多态'参数_q_l' .
           (** Qīngchú q l' ; jièshàomen l' . Jièshàomen dǐbù_duìyú_xùliè'duō tài'cānshù_q_l' . *)
           展开 公式_零 在 底部_对于_序列'多态'参数_q_l' . 清除 底部_对于_序列'多态'参数_q_l' .
           (** Zhǎnkāi gōngshì_líng zài dǐbù_duìyú_xùliè'duō tài'cānshù_q_l' . Qīngchú dǐbù_duìyú_xùliè'duō tài'cānshù_q_l' . *)
@@ -284,7 +284,7 @@ From Qoc Require Import Jisuanji .
           (** Yìngyòng (cānshù_xià yīgè xùliè'duō tài'cānshù gōngshì_líng gōngshì_xià yīgè). Zhǎnkāi gōngshì_xià yīgè. *)
           确切 dat .
           (** Quèqiè dat. *)
-        + 清除 q l' ; 介绍们 r l' . 介绍们 底部_对于_序列'多态'参数_q_l' .
+        + 清除 q l' ; 移动外 r l' . 移动外 底部_对于_序列'多态'参数_q_l' .
           (** Qīngchú q l' ; jièshàomen r l' . Jièshàomen dǐbù_duìyú_xùliè'duō tài'cānshù_q_l' . *)
           展开 公式_下一个 在 底部_对于_序列'多态'参数_q_l' .
           (** Zhǎnkāi gōngshì_xià yīgè zài dǐbù_duìyú_xùliè'duō tài'cānshù_q_l' . *)
@@ -301,7 +301,7 @@ From Qoc Require Import Jisuanji .
       Yòng (q: Wúxiàn shùzì) (l: Xùliè'duō tài'cānshù (xià yīgè q)), shùjù. *)
     证明 .
     (** Zhèngmíng. *)
-      介绍们 q l . 应用 (公式_下一个_对于_选项们'多态'参数__下一个 序列'多态'参数 公式_零 公式_下一个 q l) .
+      移动外 q l . 应用 (公式_下一个_对于_选项们'多态'参数__下一个 序列'多态'参数 公式_零 公式_下一个 q l) .
       (** Jièshàomen q l. Yìngyòng (gōngshì_xià yīgè_duìyú_xuǎnxiàngmen'duō tài'cānshù__xià yīgè xùliè'duō tài'cānshù gōngshì_líng gōngshì_xià yīgè q l). *)
       确切 (底部_对于_序列'多态'参数 (下一个 q) l) .
       (** Quèqiè (dǐbù_duìyú_xùliè'duō tài'cānshù (xià yīgè q) l). *)
