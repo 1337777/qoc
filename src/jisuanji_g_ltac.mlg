@@ -211,45 +211,45 @@ GRAMMAR EXTEND Gram
               "then" ; tat = tactic_expr ;
               "else" ; tae = tactic_expr -> { TacOnce (TacIfThenCatch(ta,tat,tae)) }
 
-      | IDENT "外" ; IDENT "内" ; IDENT "改变" ;
+      | IDENT "外" ; IDENT "内" ; IDENT "重试" ;
       	IDENT "与" ; mrl = unify_list; IDENT "结束" ->
 	{ List.fold_right (fun ta acc -> TacOr (TacThen(fst ta, snd ta),acc)) mrl
       	      	(TacFail ( TacLocal , fail_default_value , [] )) }
-      | IDENT "内" ; IDENT "改变" ;
+      | IDENT "内" ; IDENT "重试" ;
       	IDENT "与" ; mrl = unify_list; IDENT "结束" ->
 	{ (*COMPUTE HERE: *) TacOnce (List.fold_right (fun ta acc ->
 	  (*MATH HERE: TacOnce *) (TacOr (TacThen(fst ta, snd ta),acc))) mrl
       	      	(TacFail ( TacLocal , fail_default_value , [] ))) }
-      | IDENT "外" ; IDENT "改变" ;
+      | IDENT "外" ; IDENT "重试" ;
       	IDENT "与" ; mrl = unify_list; IDENT "结束" ->
 	{ List.fold_right (fun ta acc -> TacIfThenCatch(fst ta, snd ta, acc)) mrl
       	      	(TacFail ( TacLocal , fail_default_value , [] )) }
-      | IDENT "改变" ;
+      | IDENT "重试" ;
       	IDENT "与" ; mrl = unify_list; IDENT "结束" ->
 	{ TacOnce (List.fold_right (fun ta acc -> TacIfThenCatch(fst ta, snd ta, acc)) mrl
       	      	(TacFail ( TacLocal , fail_default_value , [] ))) }
 
-      | IDENT "外" ; IDENT "改变化" ;  "["; l = LIST0 tactic_expr SEP "|"; "]" ->
+      | IDENT "外" ; IDENT "重试们" ;  "["; l = LIST0 tactic_expr SEP "|"; "]" ->
       (** = _ + _ *)
         { List.fold_right (fun ta acc -> TacOr (ta,acc)) l
       	      	(TacFail ( TacLocal , fail_default_value , [] )) }
-      | IDENT "改变化" ;  "["; l = LIST0  tactic_expr SEP "|"; "]" ->
+      | IDENT "重试们" ;  "["; l = LIST0  tactic_expr SEP "|"; "]" ->
         (** = first *)
         { TacOnce (List.fold_right (fun ta acc -> TacOr (ta,acc)) l
       	      	(TacFail ( TacLocal , fail_default_value , [] ))) }
 
-      | IDENT "外" ; IDENT "内" ; IDENT "改变" ; ta = tactic_expr ;
+      | IDENT "外" ; IDENT "内" ; IDENT "重试" ; ta = tactic_expr ;
               "则" ; tat = tactic_expr ;
               "否则" ; tae = tactic_expr -> { TacOr( TacThen(ta,tat) , tae) }
-      | IDENT "内" ; IDENT "改变" ; ta = tactic_expr ;
+      | IDENT "内" ; IDENT "重试" ; ta = tactic_expr ;
               "则" ; tat = tactic_expr ;
               "否则" ; tae = tactic_expr -> { TacOnce (TacOr( TacThen(ta,tat) , tae)) }
-      | IDENT "外" ; IDENT "改变" ; ta = tactic_expr ;
+      | IDENT "外" ; IDENT "重试" ; ta = tactic_expr ;
               "则" ; tat = tactic_expr ;
               "否则" ; tae = tactic_expr ->
 	(** = tryif *)
         { TacIfThenCatch(ta,tat,tae) }
-      | IDENT "改变" ; ta = tactic_expr ;
+      | IDENT "重试" ; ta = tactic_expr ;
               "则" ; tat = tactic_expr ;
               "否则" ; tae = tactic_expr -> { TacOnce (TacIfThenCatch(ta,tat,tae)) }
 
