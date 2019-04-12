@@ -14,7 +14,28 @@ Meanwhile the worker "T" tries his first tactic "T1" which fails ;  but his "alt
 
 Outline ::
  * PART 1 : PARALLEL SUBSEQUENT TACTICS . 第1部分 : 平行随后的战术
- * PART 2 : ALTERNATIVE PRECEDENT TACTICS . 第2部分 : 替代先例的战术  *)
+ * PART 2 : ALTERNATIVE PRECEDENT TACTICS . 第2部分 : 替代先例的战术  
+
+
+(** MEMO :  Example expression : [
+
+   outer inner alter with
+     T1 ;=> I
+   | T2 ;=> J
+   end ; O 
+
+   ] . 
+
+   Here the two alternative precedent tactics are "T1" "T2" .
+   And the two inner subsequent tactics are "I" "J" .
+   And the only outer subsequent tactic is "O" .
+   
+   The keyword "inner" in "outer inner alter" tells that any failing inner subsequent tactic "I" may cause to change the alternative tactic from "T1" to "T2" ( and similar for "J" ... ) .
+   The keyword "outer" in "outer inner alter" tells that any failing outer subsequent tactic "O" may cause to change the alternative tactic from "T1" to "T2"  ( or from "T1" to "T1" and then change any alternative tactic within "I" ) ( and similar for "J" ... )
+
+ *)
+
+*)
 
 
 (** * PART 1 : PARALLEL SUBSEQUENT TACTICS . 第1部分 : 平行随后的战术 *)
@@ -92,6 +113,24 @@ Abort.
 
 
 (** * PART 2 : ALTERNATIVE PRECEDENT TACTICS . 第2部分 : 替代先例的战术  *)
+
+(** MEMO :  Example expression : [
+
+   outer inner alter with
+     T1 ;=> I
+   | T2 ;=> J
+   end ; O 
+
+   ] . 
+
+   Here the two alternative precedent tactics are "T1" "T2" .
+   And the two inner subsequent tactics are "I" "J" .
+   And the only outer subsequent tactic is "O" .
+   
+   The keyword "inner" in "outer inner alter" tells that any failing inner subsequent tactic "I" may cause to change the alternative tactic from "T1" to "T2" ( and similar for "J" ... ) .
+   The keyword "outer" in "outer inner alter" tells that any failing outer subsequent tactic "O" may cause to change the alternative tactic from "T1" to "T2"  ( or from "T1" to "T1" and then change any alternative tactic within "I" ) ( and similar for "J" ... )
+
+ *)
 
 (** _ + _ *)  (** first [ _ ] *)  (** tryif _ 否则 _ 则 *)
 目的 True .
