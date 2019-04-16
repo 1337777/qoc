@@ -13,6 +13,7 @@ https://www.bilibili.com/video/av45005443
 -----
 *)
 
+
 From Qoc Require Import Jisuanji .
 
 模块 ABC一二三 .
@@ -25,6 +26,14 @@ From Qoc Require Import Jisuanji .
 
 End ABC一二三 .
 
+Section s.
+  Fail End e.
+End s.
+Fail Print ff.
+Definition a := 1.
+Fail Definition a := 1.
+(*Dddefinition a := 1.*)
+Fail Definition b := 1 + true. 
 Local Set SsrIdents .
 Print Table SsrIdents .
 Unset SsrIdents .
