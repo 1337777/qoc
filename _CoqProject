@@ -9,6 +9,7 @@ qoc_jisuanji_parameter_option.v
 qoc_jisuanji_tactics.v
 qoc_jisuanji_environmental_parametrized_module.v
 qoc_jisuanji_tactical.v
+qoc_jisuanji_search_error.v
 qoc_jisuanji.v
 
 src/jisuanji_ppconstr.ml
@@ -22,6 +23,7 @@ src/g_jisuanji_proofs.mlg
 src/g_jisuanji_vernac.mlg
 src/jisuanji_ssrparser.mlg
 src/jisuanji_g_ltac.mlg
+src/jisuanji_cerrors_feedback.ml
 src/g_jisuanji.mlg
 src/jisuanji_vernacentries.ml
 src/jisuanji_plugin.mlpack

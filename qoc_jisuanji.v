@@ -26,30 +26,6 @@ From Qoc Require Import Jisuanji .
 
 End ABC一二三 .
 
-Section s.
-  Fail End e.
-End s.
-Fail Print ff.
-Definition a := 1.
-Fail Definition a := 1.
-(*Dddefinition a := 1.*)
-Fail Definition b := 1 + true. 
-Local Set SsrIdents .
-Print Table SsrIdents .
-Unset SsrIdents .
-Print Table SsrIdents .
-Module BB .
-Module Export AA.
-Export Set jisuanji_SsrIdents .
-Print Table SsrIdents .
-End AA.
-Print Table SsrIdents .
-End BB.
-Print Table SsrIdents .
-Unset jisuanji_SsrIdents .
-Print Table SsrIdents .
-Print Tables.
-
 (**
 -----
 
@@ -90,5 +66,14 @@ Require qoc_jisuanji_tactics .
 *)
 Require qoc_jisuanji_environmental_parametrized_module .
 
+(** + NEXT
+
+*)
+
 Require qoc_jisuanji_tactical .
 
+(** + NEXT
+
+*)
+
+Require qoc_jisuanji_search_error .

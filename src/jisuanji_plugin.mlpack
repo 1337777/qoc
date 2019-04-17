@@ -6,6 +6,7 @@ G_jisuanji_proofs
 G_jisuanji_vernac
 Jisuanji_ssrparser
 Jisuanji_g_ltac
+Jisuanji_cerrors_feedback
 G_jisuanji
 Jisuanji_ppconstr
 Jisuanji_printmod
