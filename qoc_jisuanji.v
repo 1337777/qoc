@@ -57,19 +57,32 @@ Require qoc_jisuanji_parameter_option .
 (** + Friday, March 29, 2019,  23:00:00
 OOO1337777 , COQ , 鸡算计 , mathematics , 数学 - tactic , suffice - 战术 , 满足
 https://bilibili.com/video/av47713482
-
 *)
+
 Require qoc_jisuanji_tactics .
 
-(** + NEXT
+(** + Thursday, Apriil 4, 2019,  20:20:00
+OOO1337777 , COQ , 鸡算计 , mathematics , 数学 - environmental parametrized module 1 - 环境的 参数化了 包裹 1
+https://www.bilibili.com/video/av48293615/
 
++ Friday, April 5, 2019,  22:22:00
+OOO1337777 , COQ , 鸡算计 , mathematics , 数学 - environmental parametrized module 2 - 环境的 参数化了 包裹 2
+https://www.bilibili.com/video/av48424625/
+
++ Friday, April 5, 2019,  22:44:00
+OOO1337777 , COQ , 鸡算计 , mathematics , 数学 - environmental parametrized module 3 - 环境的 参数化了 包裹 3
+https://www.bilibili.com/video/av48426398/
 *)
 Require qoc_jisuanji_environmental_parametrized_module .
 
-(** + NEXT
+(** + Tuesday, April 9, 2019,  23:23:00
+OOO1337777 , COQ , 鸡算计 , mathematics , 数学 - tactical 1 - 战术的 1
+https://www.bilibili.com/video/av48844477/
 
+ + Friday, April 12, 2019,  23:06:00
+OOO1337777 , COQ , 鸡算计 , mathematics , 数学 - tactical 2 - 战术的 2
+https://www.bilibili.com/video/av49126093/
 *)
-
 Require qoc_jisuanji_tactical .
 
 (** + NEXT

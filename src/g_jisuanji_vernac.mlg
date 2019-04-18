@@ -40,7 +40,8 @@ open Pcoq.Module
 open Pvernac.Vernac_
 open Attributes
 
-let vernac_kw = [  "进口" ; "出口" ; "从" ; ";"; ","; ">->"; ":<"; "<:"; "where"; "at" ]
+(**COMMENTED:
+let vernac_kw = [ ";"; ","; ">->"; ":<"; "<:"; "where"; "at" ]
 let _ = List.iter CLexer.add_keyword vernac_kw
 
 (* Rem: do not join the different GEXTEND into one, it breaks native *)
@@ -79,7 +80,7 @@ let parse_compat_version = let open Flags in function
   | s ->
     CErrors.user_err ~hdr:"get_compat_version"
       Pp.(str "Unknown compatibility version \"" ++ str s ++ str "\".")
-
+*)
 }
 DECLARE PLUGIN "jisuanji_plugin"
 
@@ -166,6 +167,7 @@ END
 
 {
 
+(**COMMENTED:
 let warn_plural_command =
   CWarnings.create ~name:"plural-command" ~category:"pedantic" ~default:CWarnings.Disabled
          (fun kwd -> strbrk (Printf.sprintf "Command \"%s\" expects more than one assumption." kwd))
@@ -185,7 +187,7 @@ let lname_of_lident : lident -> lname =
 
 let name_of_ident_decl : ident_decl -> name_decl =
   on_fst lname_of_lident
-
+*)
 }
 DECLARE PLUGIN "jisuanji_plugin"
 
@@ -534,6 +536,7 @@ END
 
 {
 
+(**COMMENTED:
 let only_starredidentrefs =
   Pcoq.Entry.of_parser "test_only_starredidentrefs"
     (fun strm ->
@@ -552,7 +555,7 @@ let starredidentreflist_to_expr l =
 let warn_deprecated_include_type =
   CWarnings.create ~name:"deprecated-include-type" ~category:"deprecated"
          (fun () -> strbrk "Include Type is deprecated; use Include instead")
-
+*)
 }
 DECLARE PLUGIN "jisuanji_plugin"
 
@@ -1128,7 +1131,11 @@ GRAMMAR EXTEND Gram
 	  { fun g -> VernacSearch (SearchPattern c,g, l) }
       | IDENT "SearchRewrite"; c = constr_pattern; l = in_or_out_modules; "." ->
 	  { fun g -> VernacSearch (SearchRewrite c,g, l) }
+      | IDENT "搜索'改写" (* "搜索'改写" "sousuo gaixie" ; OLD: "SearchRewrite" *) ; c = constr_pattern; l = in_or_out_modules; "." ->
+	  { fun g -> VernacSearch (SearchRewrite c,g, l) }
       | IDENT "Search"; s = searchabout_query; l = searchabout_queries; "." ->
+	  { let (sl,m) = l in fun g -> VernacSearch (SearchAbout (s::sl),g, m) }
+      | IDENT "搜索" (* "搜索" "sousuo" ; OLD: "Search" *) ; s = searchabout_query; l = searchabout_queries; "." ->
 	  { let (sl,m) = l in fun g -> VernacSearch (SearchAbout (s::sl),g, m) }
       (* compatibility: SearchAbout *)
       | IDENT "SearchAbout"; s = searchabout_query; l = searchabout_queries; "." ->

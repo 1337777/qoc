@@ -1,13 +1,3 @@
-(************************************************************************)
-(*         *   The Coq Proof Assistant / The Coq Development Team       *)
-(*  v      *   INRIA, CNRS and contributors - Copyright 1999-2018       *)
-(* <O___,, *       (see CREDITS file for the list of authors)           *)
-(*   \VV/  **************************************************************)
-(*    //   *    This file is distributed under the terms of the         *)
-(*         *     GNU Lesser General Public License Version 2.1          *)
-(*         *     (see LICENSE file for the text of the license)         *)
-(************************************************************************)
-
 (**MEMO:  [Notation] command is enough for [forall] but is not enough for [match] ... **)
 
 DECLARE PLUGIN "jisuanji_plugin"
@@ -29,17 +19,20 @@ open Pcoq
 open Pcoq.Prim
 open Pcoq.Constr
 
+(**COMMENTED:
 (* TODO: avoid this redefinition without an extra dep to Notation_ops *)
 let ldots_var = Id.of_string ".."
+*)
 
 let constr_kw =
-  [ "构" ; "近" ; "forall"; "用" ; "fun"; "作用" ; "match"; "匹配" ; "fix"; "固定" (* "固定" "guding" ; OLD : "fix" *) ; "cofix"; "反固定" (* "反固定" "fan guding" ; OLD : "cofix" *) ; "with"; "与" ; "in"; "在"; "for";
+  [ "forall"; "用" ; "fun"; "作用" ; "match"; "匹配" ; "fix"; "固定" (* "固定" "guding" ; OLD : "fix" *) ; "cofix"; "反固定" (* "反固定" "fan guding" ; OLD : "cofix" *) ; "with"; "与" ; "in"; "在"; "for";
     "end"; "结束" ; "as"; "如" ; "let"; "让"; "if"; "若" ; "then"; "则" ; "else"; "否则" ; "return"; "返回" ;
     "Prop"; "Set";  "Type"; "类型" ; ".("; "_"; "..";
     "`{"; "`("; "{|"; "|}" ]
 
 let _ = List.iter CLexer.add_keyword constr_kw
 
+(**COMMENTED:
 let mk_cast = function
     (c,(_,None)) -> c
   | (c,(_,Some ty)) ->
@@ -131,7 +124,7 @@ let name_colon =
         | _ -> err ())
 
 let aliasvar = function { CAst.v = CPatAlias (_, na) } -> Some na | _ -> None
-
+*)
 open G_constr
 
 }
@@ -217,14 +210,17 @@ GRAMMAR EXTEND Gram
         { let { CAst.loc = locid; v = id } = lid in
           let args = List.map (fun x -> CAst.make @@ CRef (qualid_of_ident ?loc:x.CAst.loc x.CAst.v, None), None) args in
           CAst.make ~loc @@ CApp((None, CAst.make ?loc:locid @@ CPatVar id),args) } ]
+    ] ;	  
 
-(**MEMO: THIS BRANCH CAUSE ERROR
-    | "9"
+(**MEMO: /!\BUG/!\ THIS BRANCH CAUSEs ERROR WITHOUT THIS SEPARATION HACK *)
+  operconstr:
+    [ "9"
       [ ".."; c = operconstr LEVEL "0"; ".." ->
         { CAst.make ~loc @@ CAppExpl ((None, (qualid_of_ident ~loc ldots_var), None),[c]) } ]
-*)
+    ] ;
 
-    | "8" [ ]
+ operconstr:
+    [ "8" [ ]
     | "1" LEFTA
       [ c=operconstr; ".("; f=global; args=LIST0 appl_arg; ")" ->
 	{ CAst.make ~loc @@ CApp((Some (List.length args+1), CAst.make @@ CRef (f,None)),args@[c,None]) }

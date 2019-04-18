@@ -17,6 +17,27 @@ function
     Ppcmd_string "已结束的最后一个块名为 "
   | Ppcmd_string " already exists" ->
     Ppcmd_string " 已经存在"
+  | Ppcmd_string " already exists." ->
+    Ppcmd_string " 已经存在."
+  | Ppcmd_string "In environment" ->
+     Ppcmd_string "在环境中"
+  | Ppcmd_string "In environment:" ->
+     Ppcmd_string "在环境中:"
+  | Ppcmd_string "The term" ->
+     Ppcmd_string "术语" 
+  | Ppcmd_string "has type" ->
+     Ppcmd_string "具有类型" 
+  | Ppcmd_string "while it is expected to have type" ->
+     Ppcmd_string "而预期类型为" 
+  | Ppcmd_string "Unable to unify" ->
+     Ppcmd_string "无法统一" 
+  | Ppcmd_string "with" ->
+     Ppcmd_string "与" 
+
+(*    
+  | Ppcmd_string "" ->
+     Ppcmd_string "" 
+*)
   | Ppcmd_string x -> Ppcmd_string x
 
 let where = function
@@ -59,6 +80,21 @@ function
 
   | Ppcmd_string " is defined" ->
     Ppcmd_string " 是定义了"
+  | Ppcmd_string "Argument scopes are" ->
+    Ppcmd_string "范围为了键入是:"
+  | Ppcmd_string "No more subgoals." ->
+    Ppcmd_string "没有更多的子目的."
+  | Ppcmd_string "subgoal" ->
+    Ppcmd_string "子目的"
+  | Ppcmd_string "subgoals" ->
+     Ppcmd_string "子目的们"
+  | Ppcmd_string "The command has indeed failed with message:" ->
+     Ppcmd_string "该命令确实因此消息而失败:"
+
+(*    
+  | Ppcmd_string "" ->
+     Ppcmd_string "" 
+*)
   | Ppcmd_string x -> Ppcmd_string x
 
 open Feedback
