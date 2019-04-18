@@ -4,17 +4,17 @@ From Qoc Require Import Jisuanji .
 
 短 :: 为了解决一些错误，自己应该围绕这个错误搜索一些东西。
 例如：
-<ME> 你好COQ电脑，
+<我> 你好鸡算计电脑，
 如果我挫误，
 你会失败，
 你会找到错误。
-<COQ> 错误：在第2行和第6列;在当前环境中未找到参考“挫误”。
-<ME> (*评论: 我去了这个包含所有已知单词的图书馆/词典： “https://translate.google.cn/#view=home&op=translate&sl=zh-CN&tl=en&text=不对” 。 我“搜索”这个相似的含义：“不对”。此搜索表明该库包含相关的动词“错误”。现在我更正了我的计算机程序。 *)
-<ME> 你好COQ电脑，
+<鸡算计> 错误：在第2行和第6列;在当前环境中未找到参考“挫误”。
+<我> (*评论: 我去了这个包含所有已知单词的图书馆/词典： “https://translate.google.cn/#view=home&op=translate&sl=zh-CN&tl=en&text=不对” 。 我“搜索”这个相似的含义：“不对”。此搜索表明该库包含相关的动词“错误”。现在我更正了我的计算机程序。 *)
+<我> 你好鸡算计电脑，
 如果我错误，
 你会失败，
 你会找到错误。
-<COQ> “目的”是定义的 。
+<鸡算计> “目的”是定义的 。
 
 Short :: To solve some error , oneself shall search for something around this error .
 EXAMPLE:
